@@ -1,7 +1,6 @@
 add_library(math
-    math/vector.hpp
+    math/math.cpp
     math/vector.cpp
-    math/matrix.hpp
     math/matrix.cpp
 )
 

@@ -17,5 +17,11 @@ struct vector {
   vector operator-(const vector &rhs) const;
   vector operator*(float scalar) const;
   vector operator/(float scalar) const;
+
+  float dot_product(const vector& other) const;
+  vector cross_product(const vector& other) const;
+  float length() const;
+  void normalize();
+  vector normalized() const;
 };
 } // end namespace math

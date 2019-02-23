@@ -1,0 +1,126 @@
+#pragma once
+
+#include "Mesh.h"
+
+class Cube : public Mesh {
+  mutable std::vector<Triangle> cached;
+
+public:
+  Cube() {
+    triangles = {
+        // SOUTH
+        {0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f},
+        {0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f},
+
+        // EAST
+        {1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f},
+        {1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f},
+
+        // NORTH
+        {1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f},
+        {1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f},
+
+        // WEST
+        {0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f},
+        {0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f},
+
+        // TOP
+        {0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f},
+        {0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f},
+
+        // BOTTOM
+        {1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f},
+        {1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f},
+
+    };
+
+    cached = triangles;
+  }
+
+  void draw(sf::RenderTarget &target, sf::RenderStates states) const override {
+    Mesh::draw(cached, [&target](sf::Vertex *vertices, size_t num) {
+      for (int i = 0; i < num; ++i) {
+        vertices[i].color = sf::Color::Red;
+      }
+      target.draw(vertices, 2, sf::Lines);
+    });
+    // reset transformations
+    cached = triangles;
+  }
+
+  void rotate(const Dimension rotation, float theta) override {
+    switch (rotation) {
+    case Dimension::X:
+      rotate(math::make_rotation_x(theta));
+      break;
+    case Dimension::Y:
+      rotate(math::make_rotation_z(theta));
+      break;
+    // TODO: Add Z rotation
+    case Dimension::Z:
+      rotate(math::make_rotation_z(theta));
+      break;
+    // TODO: Throw exception
+    default:
+      break;
+    }
+  }
+  void rotate(const math::matrix &matrix) override {
+    for (auto &polygon : cached) {
+      for (auto &vertex : polygon.vertices) {
+        vertex = math::multiply(vertex, matrix);
+      }
+    }
+    // rotated_z.vertices[0] = math::multiply(tri.vertices[0], z_rotation);
+  }
+  void translate(const math::vector &vector) override {
+    for (auto &polygon : cached) {
+      for (auto &vertex : polygon.vertices) {
+        vertex += vector;
+      }
+    }
+  }
+
+  void translate(const Dimension rotation, float delta) override {
+    for (auto &polygon : cached) {
+      for (auto &vertex : polygon.vertices) {
+        switch (rotation) {
+        case Dimension::X:
+          vertex.x += delta;
+          break;
+        case Dimension::Y:
+          vertex.y += delta;
+          break;
+        case Dimension::Z:
+          vertex.z += delta;
+          break;
+        }
+      }
+    }
+  }
+
+  void scale(float scale) override {
+    for (auto &polygon : cached) {
+      for (auto &vertex : polygon.vertices) {
+        vertex *= scale;
+      }
+    }
+  }
+  void scale(const Dimension rotation, float scale) override {
+    for (auto &polygon : cached) {
+      for (auto &vertex : polygon.vertices) {
+        switch (rotation) {
+        case Dimension::X:
+          vertex.x *= scale;
+          break;
+        case Dimension::Y:
+          vertex.y *= scale;
+          break;
+        case Dimension::Z:
+          vertex.z *= scale;
+          break;
+        }
+      }
+    }
+  }
+};
