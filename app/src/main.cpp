@@ -83,8 +83,10 @@ int main(int argc, char **argv) {
     const auto x_rotation = math::make_rotation_x(rot_x);
     const auto y_rotation = math::make_rotation_y(rot_y);
 
+    cube.scale(scale);
     cube.rotate(z_rotation);
     cube.rotate(x_rotation);
+    cube.rotate(y_rotation);
     cube.translate({0, 0, 3});
     cube.rotate(matProj);
     cube.translate({1, 1, 0});
@@ -92,7 +94,6 @@ int main(int argc, char **argv) {
     cube.scale(Dimension::Y, 0.5 * screenheight);
 
     object.scale(scale);
-
     object.rotate(z_rotation);
     object.rotate(x_rotation);
     object.rotate(y_rotation);
@@ -102,7 +103,7 @@ int main(int argc, char **argv) {
     object.scale(Dimension::X, 0.5 * screenwidth);
     object.scale(Dimension::Y, 0.5 * screenheight);
 
-    // App.draw(object);
+    App.draw(object);
     App.draw(cube);
 
     App.display();

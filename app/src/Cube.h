@@ -3,49 +3,72 @@
 #include "Mesh.h"
 
 class Cube : public Mesh {
-  mutable std::vector<Triangle> cached;
+  std::vector<Quad> quads;
+  mutable std::vector<Quad> cached;
 
 public:
   Cube() {
-    triangles = {
+    // clang-format off
+    quads = {
+        /* 2 sides are redundant, can be removed?
         // SOUTH
-        {0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f},
-        {0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f},
-
-        // EAST
-        {1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f},
-        {1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f},
-
+        {
+          0.0f, 0.0f, 0.0f,
+          0.0f, 1.0f, 0.0f,
+          1.0f, 1.0f, 0.0f,
+          1.0f, 0.0f, 0.0f,
+        },
         // NORTH
-        {1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f},
-        {1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f},
+        {
+          1.0f, 0.0f, 1.0f,
+          1.0f, 1.0f, 1.0f,
+          0.0f, 1.0f, 1.0f,
+          0.0f, 0.0f, 1.0f,
+        },
+        */
+        // EAST
+        {
+          1.0f, 0.0f, 0.0f,
+          1.0f, 1.0f, 0.0f,
+          1.0f, 1.0f, 1.0f,
+          1.0f, 0.0f, 1.0f,
+        },
 
         // WEST
-        {0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f},
-        {0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f},
-
+        {
+          0.0f, 0.0f, 1.0f,
+          0.0f, 1.0f, 1.0f,
+          0.0f, 1.0f, 0.0f,
+          0.0f, 0.0f, 0.0f,
+        },
         // TOP
-        {0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f},
-        {0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f},
-
+        {
+          0.0f, 1.0f, 0.0f,
+          0.0f, 1.0f, 1.0f,
+          1.0f, 1.0f, 1.0f,
+          1.0f, 1.0f, 0.0f,
+        },
         // BOTTOM
-        {1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f},
-        {1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f},
-
+        {
+          1.0f, 0.0f, 1.0f,
+          0.0f, 0.0f, 1.0f,
+          0.0f, 0.0f, 0.0f,
+          1.0f, 0.0f, 0.0f,
+        }
     };
-
-    cached = triangles;
+    // clang-format on
+    cached = quads;
   }
 
   void draw(sf::RenderTarget &target, sf::RenderStates states) const override {
     Mesh::draw(cached, [&target](sf::Vertex *vertices, size_t num) {
       for (int i = 0; i < num; ++i) {
-        vertices[i].color = sf::Color::Red;
+        vertices[i].color = sf::Color::White;
       }
       target.draw(vertices, 2, sf::Lines);
     });
     // reset transformations
-    cached = triangles;
+    cached = quads;
   }
 
   void rotate(const Dimension rotation, float theta) override {

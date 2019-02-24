@@ -1,28 +1,42 @@
 #pragma once
 
 #include "Mesh.h"
-#include <sstream>
 #include <fstream>
+#include <sstream>
 #include <string>
 
 class Object : public Mesh {
-  mutable std::vector<Triangle> cached;
+  std::vector<Triangle> triangles;
+
+  mutable std::vector<Triangle> cached_triangles;
+
+  std::vector<Quad> quads;
+  mutable std::vector<Quad> cached_quads;
 
 public:
   Object(const std::string &filename) {
     load_from_file(filename);
-    cached = triangles;
+    cached_triangles = triangles;
+    cached_quads = quads;
   }
 
   void draw(sf::RenderTarget &target, sf::RenderStates states) const override {
-        Mesh::draw(cached, [&target](sf::Vertex *vertices, size_t num) {
+    Mesh::draw(cached_triangles, [&target](sf::Vertex *vertices, size_t num) {
       for (int i = 0; i < num; ++i) {
         vertices[i].color = sf::Color::Green;
       }
       target.draw(vertices, 2, sf::Lines);
     });
+    Mesh::draw(cached_quads, [&target](sf::Vertex *vertices, size_t num) {
+      for (int i = 0; i < num; ++i) {
+        vertices[i].color = sf::Color::Green;
+      }
+      target.draw(vertices, 2, sf::Lines);
+    });
+
     // reset transformations
-    cached = triangles;
+    cached_triangles = triangles;
+    cached_quads = quads;
   }
 
   void rotate(const Dimension rotation, float theta) override {
@@ -31,7 +45,7 @@ public:
       rotate(math::make_rotation_x(theta));
       break;
     case Dimension::Y:
-      rotate(math::make_rotation_z(theta));
+      rotate(math::make_rotation_y(theta));
       break;
     // TODO: Add Z rotation
     case Dimension::Z:
@@ -43,15 +57,24 @@ public:
     }
   }
   void rotate(const math::matrix &matrix) override {
-    for (auto &polygon : cached) {
+    for (auto &tri : cached_triangles) {
+      for (auto &vertex : tri.vertices) {
+        vertex = math::multiply(vertex, matrix);
+      }
+    }
+    for (auto &polygon : cached_quads) {
       for (auto &vertex : polygon.vertices) {
         vertex = math::multiply(vertex, matrix);
       }
     }
-    // rotated_z.vertices[0] = math::multiply(tri.vertices[0], z_rotation);
   }
   void translate(const math::vector &vector) override {
-    for (auto &polygon : cached) {
+    for (auto &tri : cached_triangles) {
+      for (auto &vertex : tri.vertices) {
+        vertex += vector;
+      }
+    }
+    for (auto &polygon : cached_quads) {
       for (auto &vertex : polygon.vertices) {
         vertex += vector;
       }
@@ -59,7 +82,22 @@ public:
   }
 
   void translate(const Dimension rotation, float delta) override {
-    for (auto &polygon : cached) {
+    for (auto &tri : cached_triangles) {
+      for (auto &vertex : tri.vertices) {
+        switch (rotation) {
+        case Dimension::X:
+          vertex.x += delta;
+          break;
+        case Dimension::Y:
+          vertex.y += delta;
+          break;
+        case Dimension::Z:
+          vertex.z += delta;
+          break;
+        }
+      }
+    }
+    for (auto &polygon : cached_quads) {
       for (auto &vertex : polygon.vertices) {
         switch (rotation) {
         case Dimension::X:
@@ -77,14 +115,34 @@ public:
   }
 
   void scale(float scale) override {
-    for (auto &polygon : cached) {
+    for (auto &tri : cached_triangles) {
+      for (auto &vertex : tri.vertices) {
+        vertex *= scale;
+      }
+    }
+    for (auto &polygon : cached_quads) {
       for (auto &vertex : polygon.vertices) {
         vertex *= scale;
       }
     }
   }
   void scale(const Dimension rotation, float scale) override {
-    for (auto &polygon : cached) {
+    for (auto &tri : cached_triangles) {
+      for (auto &vertex : tri.vertices) {
+        switch (rotation) {
+        case Dimension::X:
+          vertex.x *= scale;
+          break;
+        case Dimension::Y:
+          vertex.y *= scale;
+          break;
+        case Dimension::Z:
+          vertex.z *= scale;
+          break;
+        }
+      }
+    }
+    for (auto &polygon : cached_quads) {
       for (auto &vertex : polygon.vertices) {
         switch (rotation) {
         case Dimension::X:
@@ -125,10 +183,19 @@ private:
       }
 
       if (line[0] == 'f') {
-        int f[3];
-        s >> junk >> f[0] >> f[1] >> f[2];
-        triangles.push_back(
-            {verts[f[0] - 1], verts[f[1] - 1], verts[f[2] - 1]});
+        const auto str = s.str();
+        auto count = std::count(str.begin(), str.end(), ' ');
+        if (count == 3) {
+          int f[3];
+          s >> junk >> f[0] >> f[1] >> f[2];
+          triangles.push_back(
+              {verts[f[0] - 1], verts[f[1] - 1], verts[f[2] - 1]});
+        } else if (count == 4) {
+          int f[4];
+          s >> junk >> f[0] >> f[1] >> f[2] >> f[3];
+          quads.push_back({verts[f[0] - 1], verts[f[1] - 1], verts[f[2] - 1],
+                              verts[f[3] - 1]});
+        }
       }
     }
   }
