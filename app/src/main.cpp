@@ -7,6 +7,7 @@
 
 #include "Cube.h"
 #include "Object.h"
+#include "Camera.h"
 
 int main(int argc, char **argv) {
   int screenwidth = 800;
@@ -21,7 +22,7 @@ int main(int argc, char **argv) {
   float fFovRad = 1.0f / tanf(fFov * 0.5f / 180.0f * 3.14159f);
 
   Cube cube;
-  Object object("spaceship.obj");
+  Object object("axis.obj");
 
   math::matrix matProj;
   matProj(0, 0) = fAspectRatio * fFovRad;
@@ -42,6 +43,8 @@ int main(int argc, char **argv) {
 
   float scale = 1;
 
+  Camera cam(90, 800/600, 0.1, 1000);
+
   while (App.isOpen()) {
     const auto current_time = clock.restart().asSeconds();
     const auto fps = 1.0f / current_time;
@@ -57,15 +60,19 @@ int main(int argc, char **argv) {
       if (Event.type == sf::Event::KeyPressed) {
         switch (Event.key.code) {
         case sf::Keyboard::Left:
+          cam.move({-5 * current_time, 0, 0});
           rot_x -= 5 * current_time;
           break;
         case sf::Keyboard::Right:
+          cam.move({5 * current_time, 0, 0});
           rot_x += 5 * current_time;
           break;
         case sf::Keyboard::Up:
+          cam.move({0, 5 * current_time, 0});
           rot_y += 5 * current_time;
           break;
         case sf::Keyboard::Down:
+          cam.move({0, -5 * current_time, 0});
           rot_y -= 5 * current_time;
           break;
         case sf::Keyboard::Equal:
@@ -79,33 +86,9 @@ int main(int argc, char **argv) {
     }
     App.clear();
 
-    const auto z_rotation = math::make_rotation_z(rot_z);
-    const auto x_rotation = math::make_rotation_x(rot_x);
-    const auto y_rotation = math::make_rotation_y(rot_y);
-
-    cube.scale(scale);
-    cube.rotate(z_rotation);
-    cube.rotate(x_rotation);
-    cube.rotate(y_rotation);
-    cube.translate({0, 0, 3});
-    cube.rotate(matProj);
-    cube.translate({1, 1, 0});
-    cube.scale(Dimension::X, 0.5 * screenwidth);
-    cube.scale(Dimension::Y, 0.5 * screenheight);
-
-    object.scale(scale);
-    object.rotate(z_rotation);
-    object.rotate(x_rotation);
-    object.rotate(y_rotation);
-    object.translate({0, 0, 10});
-    object.rotate(matProj);
-    object.translate({1, 1, 0});
-    object.scale(Dimension::X, 0.5 * screenwidth);
-    object.scale(Dimension::Y, 0.5 * screenheight);
-
+    cam.transform(object);
+    
     App.draw(object);
-    App.draw(cube);
-
     App.display();
   }
 }
