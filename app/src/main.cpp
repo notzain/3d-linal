@@ -5,9 +5,9 @@
 #include <math/math.hpp>
 #include <vector>
 
+#include "Camera.h"
 #include "Cube.h"
 #include "Object.h"
-#include "Camera.h"
 
 int main(int argc, char **argv) {
   int screenwidth = 800;
@@ -43,7 +43,7 @@ int main(int argc, char **argv) {
 
   float scale = 1;
 
-  Camera cam(90, 800/600, 0.1, 1000);
+  Camera cam(90, 800 / 600, 0.1, 1000);
 
   while (App.isOpen()) {
     const auto current_time = clock.restart().asSeconds();
@@ -57,37 +57,38 @@ int main(int argc, char **argv) {
       if (Event.type == sf::Event::Closed)
         App.close();
 
-      if (Event.type == sf::Event::KeyPressed) {
-        switch (Event.key.code) {
-        case sf::Keyboard::Left:
-          cam.move({-5 * current_time, 0, 0});
-          rot_x -= 5 * current_time;
-          break;
-        case sf::Keyboard::Right:
-          cam.move({5 * current_time, 0, 0});
-          rot_x += 5 * current_time;
-          break;
-        case sf::Keyboard::Up:
-          cam.move({0, 5 * current_time, 0});
-          rot_y += 5 * current_time;
-          break;
-        case sf::Keyboard::Down:
-          cam.move({0, -5 * current_time, 0});
-          rot_y -= 5 * current_time;
-          break;
-        case sf::Keyboard::Equal:
-          scale += 5 * current_time;
-          break;
-        case sf::Keyboard::Dash:
-          scale -= 5 * current_time;
-          break;
-        }
+      const auto movement_speed = 10;
+
+      if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
+        cam.move({-movement_speed * current_time, 0, 0});
+      }
+      if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
+        cam.move({movement_speed * current_time, 0, 0});
+      }
+      if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
+        cam.move({0, -movement_speed * current_time, 0});
+      }
+      if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
+        cam.move({0, movement_speed * current_time, 0});
+      }
+      if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
+        cam.move({0, 0, movement_speed * current_time});
+      }
+      if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) {
+        cam.move({0, 0, -movement_speed * current_time});
+      }
+      if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) {
+        cam.strafe(movement_speed * current_time);
+      }
+      if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) {
+        cam.strafe(-movement_speed * current_time);
       }
     }
+
     App.clear();
 
     cam.transform(object);
-    
+
     App.draw(object);
     App.display();
   }

@@ -28,6 +28,8 @@ public:
 
   void move(const math::vector &movement) { camera_pos += movement; }
 
+  void strafe(float rotation) { yaw += rotation; }
+
   math::matrix look_at(const math::vector &target, const math::vector &up) {
     auto new_forward = target - camera_pos;
     new_forward.normalize();
