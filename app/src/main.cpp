@@ -62,39 +62,39 @@ int main(int argc, char **argv) {
     while (App.pollEvent(Event)) {
       if (Event.type == sf::Event::Closed)
         App.close();
+    }
 
-      const auto movement_speed = 10;
+    const auto movement_speed = 10;
 
-      if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
-        cam.move({-movement_speed * current_time, 0, 0});
-      }
-      if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
-        cam.move({movement_speed * current_time, 0, 0});
-      }
-      if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
-        cam.move({0, -movement_speed * current_time, 0});
-      }
-      if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
-        cam.move({0, movement_speed * current_time, 0});
-      }
-      if (sf::Keyboard::isKeyPressed(sf::Keyboard::LShift)) {
-        cam.move({0, 0, movement_speed * current_time});
-      }
-      if (sf::Keyboard::isKeyPressed(sf::Keyboard::RShift)) {
-        cam.move({0, 0, -movement_speed * current_time});
-      }
-      if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
-        cam.look({0, 1 * current_time, 0 });
-      }
-      if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) {
-        cam.look({0, -1 * current_time, 0 });
-      }
-      if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) {
-        cam.look({-1 * current_time,0 , 0 });
-      }
-      if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) {
-        cam.look({1 * current_time,0 , 0 });
-      }
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
+      cam.move({-movement_speed * current_time, 0, 0});
+    }
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
+      cam.move({movement_speed * current_time, 0, 0});
+    }
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
+      cam.move({0, -movement_speed * current_time, 0});
+    }
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
+      cam.move({0, movement_speed * current_time, 0});
+    }
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::LShift)) {
+      cam.move({0, 0, movement_speed * current_time});
+    }
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::RShift)) {
+      cam.move({0, 0, -movement_speed * current_time});
+    }
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
+      cam.look({0, 1 * current_time, 0});
+    }
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) {
+      cam.look({0, -1 * current_time, 0});
+    }
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) {
+      cam.look({-1 * current_time, 0, 0});
+    }
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) {
+      cam.look({1 * current_time, 0, 0});
     }
 
     App.clear();
