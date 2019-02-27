@@ -17,6 +17,7 @@ class Camera {
 public:
   Camera(float fov, float aspect_ratio, float near, float far) {
     const float fov_radians = 1.f / tanf(fov * 0.5 / 180.f * M_PI);
+    look_dir = {0, 0, 1};
 
     projection_matrix(0, 0) = aspect_ratio * fov_radians;
     projection_matrix(1, 1) = fov_radians;
@@ -29,6 +30,8 @@ public:
   void move(const math::vector &movement) { camera_pos += movement; }
 
   void strafe(float rotation) { yaw += rotation; }
+
+  void look(const math::vector &look) { look_dir += look; };
 
   math::matrix look_at(const math::vector &target, const math::vector &up) {
     auto new_forward = target - camera_pos;
@@ -68,12 +71,11 @@ public:
     world_matrix *= translation;
 
     math::vector up{0, 1, 0};
-    math::vector target{0, 0, 1};
 
     auto rotation_cam = math::make_rotation_y(yaw);
-    
-    look_dir = math::multiply(target, rotation_cam);
-    target = camera_pos + look_dir;
+
+    auto look = math::multiply(look_dir, rotation_cam);
+    auto target = camera_pos + look;
 
     auto cam = look_at(target, up);
     auto view_matrix = math::inverse(cam);
