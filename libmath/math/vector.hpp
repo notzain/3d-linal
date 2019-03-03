@@ -1,12 +1,16 @@
 #pragma once
 
+#include <initializer_list>
 namespace math {
 struct vector {
   float x{0};
   float y{0};
-
   float z{0};
-  //float w{1};
+  float w{1};
+
+  vector() = default;
+  vector(float x, float y, float z) : x(x), y(y), z(z) {}
+  vector(float x, float y, float z, float w) : x(x), y(y), z(z), w(w) {}
 
   vector &operator+=(const vector &other);
   vector &operator-=(const vector &other);
@@ -18,8 +22,8 @@ struct vector {
   vector operator*(float scalar) const;
   vector operator/(float scalar) const;
 
-  float dot_product(const vector& other) const;
-  vector cross_product(const vector& other) const;
+  float dot_product(const vector &other) const;
+  vector cross_product(const vector &other) const;
   float length() const;
   void normalize();
   vector normalized() const;
