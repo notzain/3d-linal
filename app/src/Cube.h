@@ -146,4 +146,8 @@ public:
       }
     }
   }
+
+  std::vector<Quad> vertices() const {
+    return quads;
+  }
 };

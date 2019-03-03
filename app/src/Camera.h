@@ -58,6 +58,7 @@ public:
     matrix(3, 0) = camera_pos.x;
     matrix(3, 1) = camera_pos.y;
     matrix(3, 2) = camera_pos.z;
+    matrix(3, 3) = 1.f;
 
     return matrix;
   }

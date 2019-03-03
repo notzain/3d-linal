@@ -21,7 +21,6 @@ public:
   virtual void scale(float scale) = 0;
   virtual void scale(const Dimension rotation, float scale) = 0;
 
-private:
   /**
    * @brief Helper function to convert our Primitives to SFML lines.
    *
@@ -40,6 +39,10 @@ private:
         const auto &current_vertex = polygon.vertices[i];
         const auto &next_vertex =
             i == size - 1 ? polygon.vertices[0] : polygon.vertices[i + 1];
+
+        if (current_vertex.w < 0 || next_vertex.w < 0) {
+          continue;
+        }
 
         lines.push_back({sf::Vector2f{current_vertex.x, current_vertex.y},
                          sf::Vector2f{next_vertex.x, next_vertex.y}});
