@@ -1,3 +1,6 @@
+#include "imgui.h"
+#include "imgui-SFML.h"
+
 #include <SFML/Graphics.hpp>
 #include <SFML/Graphics/VertexArray.hpp>
 #include <SFML/System/Clock.hpp>
@@ -39,6 +42,7 @@ int main(int argc, char **argv) {
   int screenwidth = 800;
   int screenheight = 600;
   sf::RenderWindow App(sf::VideoMode(800, 600), "My window");
+  ImGui::SFML::Init(App);
 
   Cube cube;
   Object object("axis.obj");
