@@ -8,8 +8,9 @@
 #include <cmath>
 
 struct CameraSettings {
-  float screen_height{};
   float screen_width{};
+
+  float screen_height{};
   float aspect_ratio{};
   float fov{};
 
@@ -17,7 +18,7 @@ struct CameraSettings {
   float far{};
 };
 
-class Camera {
+struct Camera {
   CameraSettings settings{};
   math::matrix projection{};
   math::vector camera_pos{};
@@ -26,13 +27,9 @@ class Camera {
   float yaw{};
   float theta{};
 
-public:
-  Camera(const CameraSettings &settings) : settings(settings) {
-    reconfigure(settings);
-  }
+  Camera(const CameraSettings &settings) : settings(settings) { reconfigure(); }
 
-  void reconfigure(const CameraSettings &settings) {
-    this->settings = settings;
+  void reconfigure() {
     projection = math::make_projection(settings.fov, settings.aspect_ratio,
                                        settings.near, settings.far);
   }

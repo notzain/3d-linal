@@ -1,15 +1,15 @@
-#include "imgui.h"
-#include "imgui-SFML.h"
 
 #include <SFML/Graphics.hpp>
 #include <SFML/Graphics/VertexArray.hpp>
 #include <SFML/System/Clock.hpp>
+
 #include <cmath>
 #include <math/math.hpp>
 #include <vector>
 
 #include "Camera.h"
 #include "Cube.h"
+#include "Gui.h"
 #include "Object.h"
 
 struct PulsingMesh {
@@ -39,10 +39,11 @@ struct PulsingMesh {
 };
 
 int main(int argc, char **argv) {
-  int screenwidth = 800;
-  int screenheight = 600;
-  sf::RenderWindow App(sf::VideoMode(800, 600), "My window");
-  ImGui::SFML::Init(App);
+  float screenwidth = 800;
+  float screenheight = 600;
+  
+  sf::RenderWindow App(sf::VideoMode(screenwidth, screenheight), "My window");
+  GuiInit(App);
 
   Cube cube;
   Object object("axis.obj");
@@ -52,25 +53,35 @@ int main(int argc, char **argv) {
 
   PulsingMesh pulsing{1.5, 0.3, 1, false, {&cube}};
 
-  Camera camera(CameraSettings{.screen_height = 800,
-                               .screen_width = 600,
-                               .aspect_ratio = 800 / 600,
-                               .fov = 90.f,
-                               .near = 0.1f,
-                               .far = 1000.f});
+  Camera camera({.screen_width = screenwidth,
+                 .screen_height = screenheight,
+                 .aspect_ratio = screenwidth / screenheight,
+                 .fov = 90.f,
+                 .near = 0.1f,
+                 .far = 1000.f});
 
   while (App.isOpen()) {
-    const auto current_time = clock.restart().asSeconds();
-    const auto fps = 1.0f / current_time;
+    const auto time = clock.restart();
+    const auto delta_time = time.asSeconds();
+    const auto fps = 1.0f / delta_time;
 
-    last_time = current_time;
+    last_time = delta_time;
     App.setTitle("Linal " + std::to_string(fps) + " fps");
 
     sf::Event Event;
     while (App.pollEvent(Event)) {
+      ImGui::SFML::ProcessEvent(Event);
       if (Event.type == sf::Event::Closed)
         App.close();
     }
+
+    ImGui::SFML::Update(App, time);
+
+    ImGui::Begin("LINALG");
+
+    GuiDrawCameraSettings(camera);
+
+    ImGui::End();
 
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
     }
@@ -98,6 +109,8 @@ int main(int argc, char **argv) {
     camera.transform(cube);
 
     App.draw(cube);
+
+    ImGui::SFML::Render(App);
     App.display();
   }
 }
