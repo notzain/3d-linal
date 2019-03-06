@@ -70,6 +70,7 @@ matrix make_translation(const vector &translation) {
   matrix(3, 2) = translation.z;
   return matrix;
 }
+
 matrix make_scaling(const math::vector &scale) {
   matrix matrix;
   matrix(0, 0) = scale.x;

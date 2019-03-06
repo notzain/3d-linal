@@ -4,6 +4,8 @@
 #include <algorithm>
 class Cube : public Mesh {
   std::vector<Quad> quads;
+
+public:
   mutable std::vector<Quad> cached;
 
 public:
@@ -71,94 +73,35 @@ public:
     cached = quads;
   }
 
-  void rotate(const Dimension rotation, float theta) override {
-    switch (rotation) {
-    case Dimension::X:
-      rotate(math::make_rotation_x(theta));
-      break;
-    case Dimension::Y:
-      rotate(math::make_rotation_z(theta));
-      break;
-    // TODO: Add Z rotation
-    case Dimension::Z:
-      rotate(math::make_rotation_z(theta));
-      break;
-    // TODO: Throw exception
-    default:
-      break;
-    }
-  }
-  void rotate(const math::matrix &matrix) override {
-    for (auto &polygon : cached) {
-      for (auto &vertex : polygon.vertices) {
-        vertex = math::multiply(vertex, matrix);
-      }
-    }
-    // rotated_z.vertices[0] = math::multiply(tri.vertices[0], z_rotation);
-  }
-  void translate(const math::vector &vector) override {
-    for (auto &polygon : cached) {
-      for (auto &vertex : polygon.vertices) {
-        vertex += vector;
-      }
-    }
-  }
 
-  void translate(const Dimension rotation, float delta) override {
-    for (auto &polygon : cached) {
-      for (auto &vertex : polygon.vertices) {
-        switch (rotation) {
-        case Dimension::X:
-          vertex.x += delta;
-          break;
-        case Dimension::Y:
-          vertex.y += delta;
-          break;
-        case Dimension::Z:
-          vertex.z += delta;
-          break;
-        }
-      }
-    }
+  void rotate(const math::matrix& matrix) override {
+	  for (auto& polygon : cached) {
+		  for (auto& vertex : polygon.vertices) {
+			  vertex = math::multiply(vertex, matrix);
+		  }
+	  }
   }
-  void translate(const math::matrix &matrix) override {
-    for (auto &polygon : cached) {
-      for (auto &vertex : polygon.vertices) {
-        vertex = math::multiply(vertex, matrix);
-      }
-    }
+  void scale(const math::matrix& matrix) override {
+	  for (auto& polygon : cached) {
+		  for (auto& vertex : polygon.vertices) {
+			  vertex = math::multiply(vertex, matrix);
+		  }
+	  }
   }
+  void translate(const math::matrix& matrix) override {
+	  for (auto& polygon : cached) {
+		  for (auto& vertex : polygon.vertices) {
+			  vertex += math::vector(matrix(3, 0), matrix(3, 1), matrix(3, 2));
 
-  void scale(float scale) override {
-    for (auto &polygon : cached) {
-      for (auto &vertex : polygon.vertices) {
-        vertex = math::multiply(vertex, math::make_scaling({scale, scale, scale}));
-      }
-    }
+		  }
+	  }
   }
-  void scale(const Dimension rotation, float scale) override {
-    for (auto &polygon : cached) {
-      for (auto &vertex : polygon.vertices) {
-        switch (rotation) {
-        case Dimension::X:
-          vertex.x *= scale;
-          break;
-        case Dimension::Y:
-          vertex.y *= scale;
-          break;
-        case Dimension::Z:
-          vertex.z *= scale;
-          break;
-        }
-      }
-    }
-  }
-
-  void scale(const math::matrix &matrix) override {
-    for (auto &polygon : cached) {
-      for (auto &vertex : polygon.vertices) {
-        vertex = math::multiply(vertex, matrix);
-      }
-    }
+  void project(const math::matrix& matrix) override  {
+	  for (auto& polygon : cached) {
+		  for (auto& vertex : polygon.vertices) {
+			  vertex = math::multiply(vertex, matrix);
+			  vertex = vertex / vertex.w;
+		  }
+	  }
   }
 };

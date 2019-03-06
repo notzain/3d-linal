@@ -32,7 +32,7 @@ public:
   static Engine &create(const std::string &title, int width, int height) {
     Engine::get().title = title;
     Engine::get().window.create(sf::VideoMode(width, height), title);
-    GuiInit(Engine::get().window, 1.3f);
+    GuiInit(Engine::get().window);
 
     return Engine::get();
   }

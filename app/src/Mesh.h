@@ -14,15 +14,15 @@ class Mesh : public sf::Drawable {
 public:
   virtual void draw(sf::RenderTarget &target,
                     sf::RenderStates states) const = 0;
-  virtual void rotate(const Dimension rotation, float theta) = 0;
-  virtual void rotate(const math::matrix &matrix) = 0;
-  virtual void translate(const math::vector &vector) = 0;
-  virtual void translate(const Dimension rotation, float delta) = 0;
-  virtual void translate(const math::matrix &matrix) = 0;
 
-  virtual void scale(float scale) = 0;
-  virtual void scale(const Dimension rotation, float scale) = 0;
-  virtual void scale(const math::matrix &matrix) = 0;
+  virtual void rotate(const math::matrix& matrix) = 0;
+  virtual void scale(const math::matrix& matrix) = 0;
+  virtual void translate(const math::matrix& matrix) = 0;
+  virtual void project(const math::matrix& matrix) = 0;
+
+
+
+  //virtual const math::vector& origin() const = 0;
 
   /**
    * @brief Helper function to convert our Primitives to SFML lines.
@@ -43,9 +43,9 @@ public:
         const auto &next_vertex =
             i == size - 1 ? polygon.vertices[0] : polygon.vertices[i + 1];
 
-        if (current_vertex.w < 0 || next_vertex.w < 0) {
-          continue;
-        }
+		if (current_vertex.w < 0 || next_vertex.w < 0) {
+			continue;
+		}
 
         lines.push_back({sf::Vector2f{current_vertex.x, current_vertex.y},
                          sf::Vector2f{next_vertex.x, next_vertex.y}});

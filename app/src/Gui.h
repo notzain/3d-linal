@@ -25,12 +25,12 @@ void GuiDrawCameraSettings(Camera &camera) {
     if (ImGui::DragFloat("Yaw", &camera.yaw, 0.02f)) {
       updated = true;
     }
-    if (ImGui::DragFloat("Theta", &camera.theta, 0.02f)) {
+    if (ImGui::DragFloat("Theta", &camera.pitch, 0.02f)) {
       updated = true;
     }
   }
 
-  ImGui::DragFloat2("Camera Pos (X, Y)", &camera.camera_pos.x, 0.02f);
+  ImGui::DragFloat3("Camera Pos (X, Y, Z)", &camera.camera_pos.x, 0.02f);
 
   if (updated)
     camera.reconfigure();

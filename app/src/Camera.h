@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Mesh.h"
+#include "Cube.h"
 #include "math/math.hpp"
 #include "math/matrix.hpp"
 #include "math/vector.hpp"
@@ -22,10 +23,9 @@ struct Camera {
   CameraSettings settings{};
   math::matrix projection{};
   math::vector camera_pos{};
-  math::vector look_dir{};
 
   float yaw{};
-  float theta{};
+  float pitch{};
 
   Camera(const CameraSettings &settings) : settings(settings) { reconfigure(); }
 
@@ -34,31 +34,38 @@ struct Camera {
                                        settings.near, settings.far);
   }
 
-  void transform(Mesh &mesh) {
-    const auto rotZ = math::make_rotation_z(theta * 0.5f);
-    const auto rotX = math::make_rotation_x(theta);
+  void transform(Cube& mesh) {
+	  const auto rotZ = math::make_rotation_z(pitch * .5f);
+	  const auto rotX = math::make_rotation_x(pitch);
 
-    const auto translation = math::make_translation({0.f, 0.f, 5.f});
+	  const auto translation = math::make_translation({ 0.f, 0.f, 5.f });
 
-    auto world = rotZ * rotX;
-    world *= translation;
+	  auto world = rotZ * rotX;
+	  world *= translation;
 
-    math::vector up{0, 1, 0};
-    const auto cameraRot = math::make_rotation_y(yaw);
+	  math::vector up{ 0, 1, 0 };
+	  math::vector target{ 0, 0, 1 };
 
-    math::vector target{0, 0, 1};
+	  const auto cameraRot = math::make_rotation_y(yaw);
 
-    look_dir = math::multiply(target, cameraRot);
-    target = camera_pos + look_dir;
+	  auto look_dir = math::multiply(target, cameraRot);
+	  target = camera_pos + look_dir;
 
-    const auto cameraMat = math::point_at(camera_pos, target, up);
-    const auto view = math::inverse(cameraMat);
+	  const auto cameraMat = math::point_at(camera_pos, target, up);
+	  const auto view = math::inverse(cameraMat);
 
-    mesh.rotate(world);
-    mesh.rotate(view);
-    mesh.rotate(projection);
+	  for (auto& quad : mesh.cached) {
+		  for (auto& vertex : quad.vertices) {
+			  vertex = math::multiply(vertex, world);
+			  vertex = math::multiply(vertex, view);
+			  vertex = math::multiply(vertex, projection);
 
-    mesh.scale(math::make_scaling(
-        {0.5f * settings.screen_width, 0.5f * settings.screen_height, 0}));
+			  vertex = vertex / vertex.w;
+
+			  vertex = vertex + math::vector{ 1,1,0 };
+			  vertex.x *= (.5 * settings.screen_width);
+			  vertex.y *= (.5 * settings.screen_height);
+		  }
+	  }
   }
 };
