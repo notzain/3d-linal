@@ -46,16 +46,16 @@ int main(int argc, char **argv) {
   auto &engine = Engine::create("Linal", screenwidth, screenheight);
 
   Cube cube;
-  Object object("axis.obj");
+  //Object object("axis.obj");
 
   PulsingMesh pulsing{1.5, 0.3, 1, false, {&cube}};
 
-  Camera camera({.screen_width = screenwidth,
-                 .screen_height = screenheight,
-                 .aspect_ratio = screenwidth / screenheight,
-                 .fov = 90.f,
-                 .near = 0.1f,
-                 .far = 1000.f});
+  Camera camera({screenwidth,
+                 screenheight,
+                 screenwidth / screenheight,
+                 90.f,
+                 0.1f,
+                 1000.f});
 
   engine.register_gui([&camera] { GuiDrawCameraSettings(camera); });
 

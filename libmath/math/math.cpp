@@ -1,5 +1,7 @@
 #include "math.hpp"
 
+// Need for MSVC
+#define _USE_MATH_DEFINES
 #include <cmath>
 
 namespace math {
