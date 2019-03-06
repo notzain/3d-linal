@@ -14,6 +14,8 @@ namespace math {
 
     matrix make_translation(const vector& translation);
 
+    matrix make_scaling(const math::vector& scale);
+
     matrix make_projection(float fov, float aspect_ratio, float near, float far);
 
     matrix inverse(const matrix& matrix);

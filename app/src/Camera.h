@@ -58,8 +58,7 @@ struct Camera {
     mesh.rotate(view);
     mesh.rotate(projection);
 
-    mesh.translate({1, 1, 0});
-    mesh.scale(Dimension::X, settings.screen_width * 0.5f);
-    mesh.scale(Dimension::Y, settings.screen_height * 0.5f);
+    mesh.scale(math::make_scaling(
+        {0.5f * settings.screen_width, 0.5f * settings.screen_height, 0}));
   }
 };

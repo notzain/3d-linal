@@ -21,18 +21,15 @@ public:
   }
 
   void draw(sf::RenderTarget &target, sf::RenderStates states) const override {
-    Mesh::draw(cached_triangles, [&target](sf::Vertex *vertices, size_t num) {
+    const auto draw_cb = [&target](sf::Vertex *vertices, size_t num) {
       for (int i = 0; i < num; ++i) {
         vertices[i].color = sf::Color::Green;
       }
-      target.draw(vertices, 2, sf::Lines);
-    });
-    Mesh::draw(cached_quads, [&target](sf::Vertex *vertices, size_t num) {
-      for (int i = 0; i < num; ++i) {
-        vertices[i].color = sf::Color::Green;
-      }
-      target.draw(vertices, 2, sf::Lines);
-    });
+      target.draw(vertices, num, sf::Lines);
+    };
+
+    Mesh::draw(cached_triangles, draw_cb);
+    Mesh::draw(cached_quads, draw_cb);
 
     // reset transformations
     cached_triangles = triangles;
@@ -114,6 +111,19 @@ public:
     }
   }
 
+  void translate(const math::matrix &matrix) override {
+    for (auto &polygon : cached_quads) {
+      for (auto &vertex : polygon.vertices) {
+        vertex = math::multiply(vertex, matrix);
+      }
+    }
+    for (auto &polygon : cached_triangles) {
+      for (auto &vertex : polygon.vertices) {
+        vertex = math::multiply(vertex, matrix);
+      }
+    }
+  }
+
   void scale(float scale) override {
     for (auto &tri : cached_triangles) {
       for (auto &vertex : tri.vertices) {
@@ -159,6 +169,19 @@ public:
     }
   }
 
+  void scale(const math::matrix &matrix) override {
+    for (auto &polygon : cached_quads) {
+      for (auto &vertex : polygon.vertices) {
+        vertex = math::multiply(vertex, matrix);
+      }
+    }
+    for (auto &polygon : cached_triangles) {
+      for (auto &vertex : polygon.vertices) {
+        vertex = math::multiply(vertex, matrix);
+      }
+    }
+  }
+
 private:
   void load_from_file(const std::string &filename) {
     std::ifstream f(filename);
@@ -194,7 +217,7 @@ private:
           int f[4];
           s >> junk >> f[0] >> f[1] >> f[2] >> f[3];
           quads.push_back({verts[f[0] - 1], verts[f[1] - 1], verts[f[2] - 1],
-                              verts[f[3] - 1]});
+                           verts[f[3] - 1]});
         }
       }
     }

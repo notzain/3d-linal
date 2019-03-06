@@ -121,11 +121,18 @@ public:
       }
     }
   }
+  void translate(const math::matrix &matrix) override {
+    for (auto &polygon : cached) {
+      for (auto &vertex : polygon.vertices) {
+        vertex = math::multiply(vertex, matrix);
+      }
+    }
+  }
 
   void scale(float scale) override {
     for (auto &polygon : cached) {
       for (auto &vertex : polygon.vertices) {
-        vertex *= scale;
+        vertex = math::multiply(vertex, math::make_scaling({scale, scale, scale}));
       }
     }
   }
@@ -147,7 +154,11 @@ public:
     }
   }
 
-  std::vector<Quad> vertices() const {
-    return quads;
+  void scale(const math::matrix &matrix) override {
+    for (auto &polygon : cached) {
+      for (auto &vertex : polygon.vertices) {
+        vertex = math::multiply(vertex, matrix);
+      }
+    }
   }
 };

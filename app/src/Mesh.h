@@ -18,8 +18,11 @@ public:
   virtual void rotate(const math::matrix &matrix) = 0;
   virtual void translate(const math::vector &vector) = 0;
   virtual void translate(const Dimension rotation, float delta) = 0;
+  virtual void translate(const math::matrix &matrix) = 0;
+
   virtual void scale(float scale) = 0;
   virtual void scale(const Dimension rotation, float scale) = 0;
+  virtual void scale(const math::matrix &matrix) = 0;
 
   /**
    * @brief Helper function to convert our Primitives to SFML lines.

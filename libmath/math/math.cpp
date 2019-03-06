@@ -68,6 +68,14 @@ matrix make_translation(const vector &translation) {
   matrix(3, 2) = translation.z;
   return matrix;
 }
+matrix make_scaling(const math::vector &scale) {
+  matrix matrix;
+  matrix(0, 0) = scale.x;
+  matrix(1, 1) = scale.y;
+  matrix(2, 2) = scale.z;
+  matrix(3, 3) = 1.f;
+  return matrix;
+}
 
 matrix make_projection(float fov, float aspect_ratio, float near, float far) {
   const float fov_radians = 1.f / tanf(fov * 0.5f / 180 * M_PI);
