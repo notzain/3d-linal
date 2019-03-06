@@ -31,6 +31,7 @@ void GuiDrawCameraSettings(Camera &camera) {
   }
 
   ImGui::DragFloat3("Camera Pos (X, Y, Z)", &camera.camera_pos.x, 0.02f);
+  //ImGui::DragFloat3("Camera LookAt (X, Y, Z)", &camera.target.x, 0.02f);
 
   if (updated)
     camera.reconfigure();

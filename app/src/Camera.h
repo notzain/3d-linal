@@ -19,8 +19,10 @@ struct CameraSettings {
   float far{};
 };
 
+// https://learnopengl.com/Getting-started/Camera
 struct Camera {
   CameraSettings settings{};
+  
   math::matrix projection{};
   math::vector camera_pos{};
 
@@ -34,9 +36,9 @@ struct Camera {
                                        settings.near, settings.far);
   }
 
-  void transform(Cube& mesh) {
-	  const auto rotZ = math::make_rotation_z(pitch * .5f);
-	  const auto rotX = math::make_rotation_x(pitch);
+  void transform(Mesh& mesh) {
+	  const auto rotZ = math::make_rotation_z(0.f);
+	  const auto rotX = math::make_rotation_x(0.f);
 
 	  const auto translation = math::make_translation({ 0.f, 0.f, 5.f });
 
@@ -44,28 +46,25 @@ struct Camera {
 	  world *= translation;
 
 	  math::vector up{ 0, 1, 0 };
-	  math::vector target{ 0, 0, 1 };
+	  math::vector target{ 0, pitch, 1 };
 
 	  const auto cameraRot = math::make_rotation_y(yaw);
 
 	  auto look_dir = math::multiply(target, cameraRot);
-	  target = camera_pos + look_dir;
+	  auto look_at = camera_pos + look_dir;
 
-	  const auto cameraMat = math::point_at(camera_pos, target, up);
+	  const auto cameraMat = math::point_at(camera_pos, look_at, up);
+	  
+	  // in this case, also works without inverse. 
+	  // results in flipped normals (might be ok for this program)
 	  const auto view = math::inverse(cameraMat);
 
-	  for (auto& quad : mesh.cached) {
-		  for (auto& vertex : quad.vertices) {
-			  vertex = math::multiply(vertex, world);
-			  vertex = math::multiply(vertex, view);
-			  vertex = math::multiply(vertex, projection);
+	  mesh.rotate(world);
+	  mesh.rotate(cameraMat);
+	  mesh.project(projection);
 
-			  vertex = vertex / vertex.w;
+	  mesh.translate(math::make_translation({ 1,1,0 }));
+	  mesh.scale(math::make_scaling({ .5f * settings.screen_width, .5f * settings.screen_height, 1 }));
 
-			  vertex = vertex + math::vector{ 1,1,0 };
-			  vertex.x *= (.5 * settings.screen_width);
-			  vertex.y *= (.5 * settings.screen_height);
-		  }
-	  }
   }
 };
