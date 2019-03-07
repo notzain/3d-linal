@@ -63,12 +63,16 @@ struct Camera {
     // Move the mesh to its desired position by translating it by its origin.
     mesh.translate(math::make_translation(mesh.origin()));
 
+    mesh.rotate(math::make_rotation_x(mesh.rotation().x));
+    mesh.rotate(math::make_rotation_y(mesh.rotation().y));
+    mesh.rotate(math::make_rotation_z(mesh.rotation().z));
+
     mesh.rotate(world);
     mesh.rotate(cameraMat);
     mesh.project(projection);
 
-    mesh.translate(math::make_translation({1, 1, 0}));
+    mesh.translate(math::make_translation({1 - mesh.origin().x/2, 1 - mesh.origin().y/2, 0}));
     mesh.scale(math::make_scaling(
-        {.5f * settings.screen_width, .5f * settings.screen_height, 1}));
+        {.5f * settings.screen_width, .5f * settings.screen_height, 0}));
   }
 };

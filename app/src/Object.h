@@ -1,5 +1,6 @@
 #pragma once
 
+#include "math/math.hpp"
 #include "Mesh.h"
 #include <fstream>
 #include <sstream>
@@ -7,6 +8,7 @@
 
 class Object : public Mesh {
   math::vector origin_;
+  math::vector rotation_;
 
   std::vector<Triangle> triangles;
   mutable std::vector<Triangle> cached_triangles;
@@ -40,8 +42,11 @@ public:
     cached_quads = quads;
   }
 
-  math::vector &origin() { return origin_; }
-  math::vector origin() const { return origin_; }
+  math::vector &origin() override { return origin_; }
+  math::vector origin() const override { return origin_; }
+
+  math::vector &rotation() override { return rotation_; }
+  math::vector rotation() const override { return rotation_; }
 
   void rotate(const math::matrix &matrix) override {
     for (auto &polygon : cached_quads) {

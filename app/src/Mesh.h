@@ -25,6 +25,9 @@ public:
   virtual math::vector origin() const = 0;
   virtual math::vector &origin() = 0;
 
+  virtual math::vector rotation() const = 0;
+  virtual math::vector &rotation() = 0;
+
 private:
   /**
    * @brief Helper function to convert our Primitives to SFML lines.

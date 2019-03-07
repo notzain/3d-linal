@@ -7,6 +7,7 @@
 class Cube : public Mesh {
   std::vector<Quad> quads;
   math::vector origin_;
+  math::vector rotation_;
 
 public:
   mutable std::vector<Quad> cached;
@@ -66,6 +67,8 @@ public:
 
   math::vector &origin() override { return origin_; }
   math::vector origin() const override { return origin_; }
+  math::vector &rotation() override { return rotation_; }
+  math::vector rotation() const override { return rotation_; }
 
   void draw(sf::RenderTarget &target, sf::RenderStates states) const override {
     Mesh::draw(cached,

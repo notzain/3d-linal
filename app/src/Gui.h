@@ -89,6 +89,9 @@ private:
         if (ImGui::TreeNode((void *)(intptr_t)i, "%d", i)) {
           ImGui::DragFloat3("Position (X, Y, Z)", &meshes[i]->origin().x,
                             0.02f);
+          ImGui::DragFloat3("Rotation (X, Y, Z)", &meshes[i]->rotation().x,
+                            0.02f);
+
           ImGui::ColorEdit3("Color", meshes[i]->color);
           ImGui::TreePop();
         }
