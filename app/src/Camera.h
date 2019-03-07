@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Mesh.h"
 #include "Cube.h"
+#include "Mesh.h"
 #include "math/math.hpp"
 #include "math/matrix.hpp"
 #include "math/vector.hpp"
@@ -22,7 +22,7 @@ struct CameraSettings {
 // https://learnopengl.com/Getting-started/Camera
 struct Camera {
   CameraSettings settings{};
-  
+
   math::matrix projection{};
   math::vector camera_pos{};
 
@@ -36,39 +36,39 @@ struct Camera {
                                        settings.near, settings.far);
   }
 
-  void transform(Mesh& mesh) {
-	  const auto rotZ = math::make_rotation_z(0.f);
-	  const auto rotX = math::make_rotation_x(0.f);
+  void transform(Mesh &mesh) {
+    const auto rotZ = math::make_rotation_z(0.f);
+    const auto rotX = math::make_rotation_x(0.f);
 
-	  const auto translation = math::make_translation({ 0.f, 0.f, 5.f });
+    const auto translation = math::make_translation({0.f, 0.f, 5.f});
 
-	  auto world = rotZ * rotX;
-	  world *= translation;
+    auto world = rotZ * rotX;
+    world *= translation;
 
-	  math::vector up{ 0, 1, 0 };
-	  math::vector target{ yaw, pitch, 1 };
+    math::vector up{0, 1, 0};
+    math::vector target{yaw, pitch, 1};
 
-	  const auto cameraRot = math::make_rotation_y(0.f);
+    const auto cameraRot = math::make_rotation_y(0.f);
 
-	  auto look_dir = math::multiply(target, cameraRot);
-	  auto look_at = camera_pos + look_dir;
+    auto look_dir = math::multiply(target, cameraRot);
+    auto look_at = camera_pos + look_dir;
 
-	  const auto cameraMat = math::point_at(camera_pos, look_at, up);
-	  
-	  // in this case, also works without inverse. 
-	  // results in flipped normals (might be ok for this program)
-	  const auto view = math::inverse(cameraMat);
+    const auto cameraMat = math::point_at(camera_pos, look_at, up);
 
-	  // Every mesh is positioned on (0,0,0).
-	  // Move the mesh to its desired position by translating it by its origin.
-	  mesh.translate(math::make_translation(mesh.origin()));
+    // in this case, also works without inverse.
+    // results in flipped normals (might be ok for this program)
+    const auto view = math::inverse(cameraMat);
 
-	  mesh.rotate(world);
-	  mesh.rotate(cameraMat);
-	  mesh.project(projection);
+    // Every mesh is positioned on (0,0,0).
+    // Move the mesh to its desired position by translating it by its origin.
+    mesh.translate(math::make_translation(mesh.origin()));
 
-	  mesh.translate(math::make_translation({ 1,1,0 }));
-	  mesh.scale(math::make_scaling({ .5f * settings.screen_width, .5f * settings.screen_height, 1 }));
+    mesh.rotate(world);
+    mesh.rotate(cameraMat);
+    mesh.project(projection);
 
+    mesh.translate(math::make_translation({1, 1, 0}));
+    mesh.scale(math::make_scaling(
+        {.5f * settings.screen_width, .5f * settings.screen_height, 1}));
   }
 };

@@ -12,8 +12,8 @@ public:
   mutable std::vector<Quad> cached;
 
 public:
-	Cube(math::vector origin = {}) {
-		origin_ = origin;
+  Cube(math::vector origin = {}) {
+    origin_ = origin;
     // clang-format off
     quads = {
         // SOUTH
@@ -64,51 +64,51 @@ public:
     cached = quads;
   }
 
-	math::vector& origin() { return origin_; }
-	math::vector origin() const { return origin_; }
+  math::vector &origin() override { return origin_; }
+  math::vector origin() const override { return origin_; }
 
   void draw(sf::RenderTarget &target, sf::RenderStates states) const override {
-
-    Mesh::draw(cached, [&target, color = sf::Color(color[0] * 255, color[1] * 255, color[2] * 255)](sf::Vertex *vertices, size_t num) {
-      for (int i = 0; i < num; ++i) {
-		  vertices[i].color = color;
-      }
-      target.draw(vertices, 2, sf::Lines);
-    });
+    Mesh::draw(cached,
+               [&target, color = sf::Color(color[0] * 255, color[1] * 255,
+                                           color[2] * 255)](
+                   sf::Vertex *vertices, size_t num) {
+                 for (int i = 0; i < num; ++i) {
+                   vertices[i].color = color;
+                 }
+                 target.draw(vertices, 2, sf::Lines);
+               });
 
     // reset transformations
     cached = quads;
   }
 
-
-  void rotate(const math::matrix& matrix) override {
-	  for (auto& polygon : cached) {
-		  for (auto& vertex : polygon.vertices) {
-			  vertex = math::multiply(vertex, matrix);
-		  }
-	  }
+  void rotate(const math::matrix &matrix) override {
+    for (auto &polygon : cached) {
+      for (auto &vertex : polygon.vertices) {
+        vertex = math::multiply(vertex, matrix);
+      }
+    }
   }
-  void scale(const math::matrix& matrix) override {
-	  for (auto& polygon : cached) {
-		  for (auto& vertex : polygon.vertices) {
-			  vertex = math::multiply(vertex, matrix);
-		  }
-	  }
+  void scale(const math::matrix &matrix) override {
+    for (auto &polygon : cached) {
+      for (auto &vertex : polygon.vertices) {
+        vertex = math::multiply(vertex, matrix);
+      }
+    }
   }
-  void translate(const math::matrix& matrix) override {
-	  for (auto& polygon : cached) {
-		  for (auto& vertex : polygon.vertices) {
-			  vertex += math::vector(matrix(3, 0), matrix(3, 1), matrix(3, 2));
-
-		  }
-	  }
+  void translate(const math::matrix &matrix) override {
+    for (auto &polygon : cached) {
+      for (auto &vertex : polygon.vertices) {
+        vertex += math::vector(matrix(3, 0), matrix(3, 1), matrix(3, 2));
+      }
+    }
   }
-  void project(const math::matrix& matrix) override  {
-	  for (auto& polygon : cached) {
-		  for (auto& vertex : polygon.vertices) {
-			  vertex = math::multiply(vertex, matrix);
-			  vertex = vertex / vertex.w;
-		  }
-	  }
+  void project(const math::matrix &matrix) override {
+    for (auto &polygon : cached) {
+      for (auto &vertex : polygon.vertices) {
+        vertex = math::multiply(vertex, matrix);
+        vertex = vertex / vertex.w;
+      }
+    }
   }
 };

@@ -12,23 +12,20 @@ enum class Dimension { X, Y, Z };
 
 class Mesh : public sf::Drawable {
 public:
-
-	float color[3] = { 1,1,1 };
+  float color[3] = {1, 1, 1};
 
   virtual void draw(sf::RenderTarget &target,
                     sf::RenderStates states) const = 0;
 
-  virtual void rotate(const math::matrix& matrix) = 0;
-  virtual void scale(const math::matrix& matrix) = 0;
-  virtual void translate(const math::matrix& matrix) = 0;
-  virtual void project(const math::matrix& matrix) = 0;
+  virtual void rotate(const math::matrix &matrix) = 0;
+  virtual void scale(const math::matrix &matrix) = 0;
+  virtual void translate(const math::matrix &matrix) = 0;
+  virtual void project(const math::matrix &matrix) = 0;
 
   virtual math::vector origin() const = 0;
-  virtual math::vector& origin() = 0;
-
+  virtual math::vector &origin() = 0;
 
 private:
-
   /**
    * @brief Helper function to convert our Primitives to SFML lines.
    *
@@ -48,9 +45,9 @@ private:
         const auto &next_vertex =
             i == size - 1 ? polygon.vertices[0] : polygon.vertices[i + 1];
 
-		if (current_vertex.w < 0 || next_vertex.w < 0) {
-			continue;
-		}
+        if (current_vertex.w < 0 || next_vertex.w < 0) {
+          continue;
+        }
 
         lines.push_back({sf::Vector2f{current_vertex.x, current_vertex.y},
                          sf::Vector2f{next_vertex.x, next_vertex.y}});

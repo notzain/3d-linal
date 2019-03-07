@@ -6,7 +6,7 @@
 #include <string>
 
 class Object : public Mesh {
-	math::vector origin_;
+  math::vector origin_;
 
   std::vector<Triangle> triangles;
   mutable std::vector<Triangle> cached_triangles;
@@ -22,12 +22,15 @@ public:
   }
 
   void draw(sf::RenderTarget &target, sf::RenderStates states) const override {
-    const auto draw_cb = [&target, color = sf::Color(color[0] * 255, color[1] * 255, color[2] * 255)](sf::Vertex *vertices, size_t num) {
-      for (int i = 0; i < num; ++i) {
-        vertices[i].color = color;
-      }
-      target.draw(vertices, num, sf::Lines);
-    };
+    const auto draw_cb =
+        [&target,
+         color = sf::Color(color[0] * 255, color[1] * 255, color[2] * 255)](
+            sf::Vertex *vertices, size_t num) {
+          for (int i = 0; i < num; ++i) {
+            vertices[i].color = color;
+          }
+          target.draw(vertices, num, sf::Lines);
+        };
 
     Mesh::draw(cached_triangles, draw_cb);
     Mesh::draw(cached_quads, draw_cb);
@@ -37,60 +40,58 @@ public:
     cached_quads = quads;
   }
 
-  math::vector& origin() { return origin_; }
+  math::vector &origin() { return origin_; }
   math::vector origin() const { return origin_; }
 
-  void rotate(const math::matrix& matrix) override {
-	  for (auto& polygon : cached_quads) {
-		  for (auto& vertex : polygon.vertices) {
-			  vertex = math::multiply(vertex, matrix);
-		  }
-	  }
-	  for (auto& polygon : cached_triangles) {
-		  for (auto& vertex : polygon.vertices) {
-			  vertex = math::multiply(vertex, matrix);
-		  }
-	  }
+  void rotate(const math::matrix &matrix) override {
+    for (auto &polygon : cached_quads) {
+      for (auto &vertex : polygon.vertices) {
+        vertex = math::multiply(vertex, matrix);
+      }
+    }
+    for (auto &polygon : cached_triangles) {
+      for (auto &vertex : polygon.vertices) {
+        vertex = math::multiply(vertex, matrix);
+      }
+    }
   }
-  void scale(const math::matrix& matrix) override {
-	  for (auto& polygon : cached_quads) {
-		  for (auto& vertex : polygon.vertices) {
-			  vertex = math::multiply(vertex, matrix);
-		  }
-	  }
-	  for (auto& polygon : cached_triangles) {
-		  for (auto& vertex : polygon.vertices) {
-			  vertex = math::multiply(vertex, matrix);
-		  }
-	  }
+  void scale(const math::matrix &matrix) override {
+    for (auto &polygon : cached_quads) {
+      for (auto &vertex : polygon.vertices) {
+        vertex = math::multiply(vertex, matrix);
+      }
+    }
+    for (auto &polygon : cached_triangles) {
+      for (auto &vertex : polygon.vertices) {
+        vertex = math::multiply(vertex, matrix);
+      }
+    }
   }
-  void translate(const math::matrix& matrix) override {
-	  for (auto& polygon : cached_quads) {
-		  for (auto& vertex : polygon.vertices) {
-			  vertex += math::vector(matrix(3, 0), matrix(3, 1), matrix(3, 2));
-
-		  }
-	  }
-	  for (auto& polygon : cached_triangles) {
-		  for (auto& vertex : polygon.vertices) {
-			  vertex += math::vector(matrix(3, 0), matrix(3, 1), matrix(3, 2));
-
-		  }
-	  }
+  void translate(const math::matrix &matrix) override {
+    for (auto &polygon : cached_quads) {
+      for (auto &vertex : polygon.vertices) {
+        vertex += math::vector(matrix(3, 0), matrix(3, 1), matrix(3, 2));
+      }
+    }
+    for (auto &polygon : cached_triangles) {
+      for (auto &vertex : polygon.vertices) {
+        vertex += math::vector(matrix(3, 0), matrix(3, 1), matrix(3, 2));
+      }
+    }
   }
-  void project(const math::matrix& matrix) override {
-	  for (auto& polygon : cached_quads) {
-		  for (auto& vertex : polygon.vertices) {
-			  vertex = math::multiply(vertex, matrix);
-			  vertex = vertex / vertex.w;
-		  }
-	  }
-	  for (auto& polygon : cached_triangles) {
-		  for (auto& vertex : polygon.vertices) {
-			  vertex = math::multiply(vertex, matrix);
-			  vertex = vertex / vertex.w;
-		  }
-	  }
+  void project(const math::matrix &matrix) override {
+    for (auto &polygon : cached_quads) {
+      for (auto &vertex : polygon.vertices) {
+        vertex = math::multiply(vertex, matrix);
+        vertex = vertex / vertex.w;
+      }
+    }
+    for (auto &polygon : cached_triangles) {
+      for (auto &vertex : polygon.vertices) {
+        vertex = math::multiply(vertex, matrix);
+        vertex = vertex / vertex.w;
+      }
+    }
   }
 
 private:

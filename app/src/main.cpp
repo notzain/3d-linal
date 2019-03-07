@@ -21,18 +21,17 @@ struct PulsingMesh {
   std::vector<Mesh *> meshes;
 
   void pulse(float elapsedTime) {
-	  if (isExpanding) {
-		  currentPulse += pulseStep * elapsedTime;
-		  if (currentPulse >= maxPulse) {
-			  isExpanding = false;
-		  }
-	  }
-	  else {
-		  currentPulse -= pulseStep * elapsedTime;
-		  if (currentPulse <= 1.f) {
-			  isExpanding = true;
-		  }
-	  }
+    if (isExpanding) {
+      currentPulse += pulseStep * elapsedTime;
+      if (currentPulse >= maxPulse) {
+        isExpanding = false;
+      }
+    } else {
+      currentPulse -= pulseStep * elapsedTime;
+      if (currentPulse <= 1.f) {
+        isExpanding = true;
+      }
+    }
   }
 };
 
@@ -40,7 +39,7 @@ int main(int argc, char **argv) {
   float screenwidth = 1280;
   float screenheight = 720;
 
-  auto& engine = Engine::get();
+  auto &engine = Engine::get();
   engine.init("LINAL", 1270, 720);
 
   Cube cube;
@@ -48,23 +47,16 @@ int main(int argc, char **argv) {
 
   PulsingMesh pulsing{1.5, 0.3, 1, false, {&cube}};
 
-  Camera camera({screenwidth,
-                 screenheight,
-                 screenheight/screenheight,
-                 90.f,
-                 0.1f,
-                 1000.f});
-
+  Camera camera({screenwidth, screenheight, screenheight / screenheight, 90.f,
+                 0.1f, 1000.f});
 
   engine.run([&](float dt) {
-
     camera.transform(cube);
-	camera.transform(object);
+    camera.transform(object);
 
-	GUI::get().draw(&camera, {&cube, &object});
+    GUI::get().draw(&camera, {&cube, &object});
 
-	engine.draw(cube);
-	engine.draw(object);
+    engine.draw(cube);
+    engine.draw(object);
   });
-
 }

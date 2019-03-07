@@ -29,7 +29,7 @@ public:
     this->title = title;
     this->window.create(sf::VideoMode(width, height), title);
 
-	GUI::get().init(window);
+    GUI::get().init(window);
   }
 
   void set_title(const std::string &title) {
@@ -40,13 +40,13 @@ public:
   void show_fps(bool show) {
     show_fps_ = show;
 
-	if (!show) {
-		set_title(title);
-	}
+    if (!show) {
+      set_title(title);
+    }
   }
 
   void set_framerate(unsigned int framerate) {
-	  window.setFramerateLimit(framerate);
+    window.setFramerateLimit(framerate);
   }
 
   bool is_running() const { return window.isOpen(); }
@@ -58,7 +58,7 @@ public:
 
     sf::Event event;
     while (window.pollEvent(event)) {
-		GUI::get().poll(event);
+      GUI::get().poll(event);
       if (event.type == sf::Event::Closed)
         window.close();
     }
@@ -67,7 +67,7 @@ public:
       window.setTitle(title + " - " + std::to_string(fps));
     }
 
-	GUI::get().update(window, time);
+    GUI::get().update(window, time);
   }
 
   void draw(sf::Drawable &drawable) { window.draw(drawable); }
@@ -80,8 +80,8 @@ public:
 
       func(delta_time);
 
-	  GUI::get().display(window);
-	  window.display();
+      GUI::get().display(window);
+      window.display();
     }
   }
 };
