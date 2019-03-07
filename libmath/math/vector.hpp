@@ -1,6 +1,5 @@
 #pragma once
 
-#include <initializer_list>
 namespace math {
 struct vector {
   float x{0};

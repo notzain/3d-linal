@@ -16,10 +16,6 @@ class Engine {
   float delta_time = 0;
   bool show_fps_ = true;
 
-  bool show_gui_ = true;
-
-  std::vector<GuiCallback> gui_callbacks;
-
   Engine() = default;
   ~Engine() = default;
 
@@ -29,27 +25,29 @@ public:
     return engine;
   }
 
-  static Engine &create(const std::string &title, int width, int height) {
-    Engine::get().title = title;
-    Engine::get().window.create(sf::VideoMode(width, height), title);
-    GuiInit(Engine::get().window);
+  void init(const std::string &title, int width, int height) {
+    this->title = title;
+    this->window.create(sf::VideoMode(width, height), title);
 
-    return Engine::get();
+	GUI::get().init(window);
   }
 
-  void register_gui(GuiCallback &&callback) {
-    gui_callbacks.push_back(std::move(callback));
-  }
   void set_title(const std::string &title) {
     this->title = title;
     window.setTitle(title);
   }
+
   void show_fps(bool show) {
     show_fps_ = show;
-    set_title(title);
+
+	if (!show) {
+		set_title(title);
+	}
   }
 
-  void show_gui(bool show) { show_gui_ = show; }
+  void set_framerate(unsigned int framerate) {
+	  window.setFramerateLimit(framerate);
+  }
 
   bool is_running() const { return window.isOpen(); }
 
@@ -60,32 +58,19 @@ public:
 
     sf::Event event;
     while (window.pollEvent(event)) {
-      ImGui::SFML::ProcessEvent(event);
+		GUI::get().poll(event);
       if (event.type == sf::Event::Closed)
         window.close();
     }
 
-    ImGui::SFML::Update(window, time);
-
     if (show_fps_) {
-      window.setTitle(title + std::to_string(fps));
+      window.setTitle(title + " - " + std::to_string(fps));
     }
+
+	GUI::get().update(window, time);
   }
 
   void draw(sf::Drawable &drawable) { window.draw(drawable); }
-
-  void show() {
-    if (show_gui_) {
-      ImGui::Begin("extra punten");
-      for (const auto &cb : gui_callbacks) {
-        cb();
-      }
-      ImGui::End();
-      ImGui::SFML::Render(window);
-    }
-
-    window.display();
-  }
 
   template <typename Func> void run(Func &&func) {
     while (is_running()) {
@@ -95,7 +80,8 @@ public:
 
       func(delta_time);
 
-      show();
+	  GUI::get().display(window);
+	  window.display();
     }
   }
 };

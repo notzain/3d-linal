@@ -40,10 +40,11 @@ int main(int argc, char **argv) {
   float screenwidth = 1280;
   float screenheight = 720;
 
-  auto &engine = Engine::create("Linal", screenwidth, screenheight);
+  auto& engine = Engine::get();
+  engine.init("LINAL", 1270, 720);
 
   Cube cube;
-  //Object object("axis.obj");
+  Object object("objs/axis.obj");
 
   PulsingMesh pulsing{1.5, 0.3, 1, false, {&cube}};
 
@@ -54,14 +55,16 @@ int main(int argc, char **argv) {
                  0.1f,
                  1000.f});
 
-  engine.register_gui([&camera] { GuiDrawCameraSettings(camera); });
 
   engine.run([&](float dt) {
-    //pulsing.pulse(dt);
 
     camera.transform(cube);
+	camera.transform(object);
 
-    engine.draw(cube);
+	GUI::get().draw(&camera, {&cube, &object});
+
+	engine.draw(cube);
+	engine.draw(object);
   });
 
 }

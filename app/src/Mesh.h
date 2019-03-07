@@ -12,6 +12,9 @@ enum class Dimension { X, Y, Z };
 
 class Mesh : public sf::Drawable {
 public:
+
+	float color[3] = { 1,1,1 };
+
   virtual void draw(sf::RenderTarget &target,
                     sf::RenderStates states) const = 0;
 
@@ -20,9 +23,11 @@ public:
   virtual void translate(const math::matrix& matrix) = 0;
   virtual void project(const math::matrix& matrix) = 0;
 
+  virtual math::vector origin() const = 0;
+  virtual math::vector& origin() = 0;
 
 
-  //virtual const math::vector& origin() const = 0;
+private:
 
   /**
    * @brief Helper function to convert our Primitives to SFML lines.

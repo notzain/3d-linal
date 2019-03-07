@@ -1,18 +1,21 @@
 #pragma once
 
 #include "Mesh.h"
+#include "math/math.hpp"
 #include <algorithm>
+
 class Cube : public Mesh {
   std::vector<Quad> quads;
+  math::vector origin_;
 
 public:
   mutable std::vector<Quad> cached;
 
 public:
-  Cube() {
+	Cube(math::vector origin = {}) {
+		origin_ = origin;
     // clang-format off
     quads = {
-        //2 sides are redundant, can be removed?
         // SOUTH
         {
           math::vector(0.0f, 0.0f, 0.0f),
@@ -61,10 +64,14 @@ public:
     cached = quads;
   }
 
+	math::vector& origin() { return origin_; }
+	math::vector origin() const { return origin_; }
+
   void draw(sf::RenderTarget &target, sf::RenderStates states) const override {
-    Mesh::draw(cached, [&target](sf::Vertex *vertices, size_t num) {
+
+    Mesh::draw(cached, [&target, color = sf::Color(color[0] * 255, color[1] * 255, color[2] * 255)](sf::Vertex *vertices, size_t num) {
       for (int i = 0; i < num; ++i) {
-        vertices[i].color = sf::Color::White;
+		  vertices[i].color = color;
       }
       target.draw(vertices, 2, sf::Lines);
     });

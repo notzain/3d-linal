@@ -10,9 +10,9 @@
 
 struct CameraSettings {
   float screen_width{};
-
   float screen_height{};
   float aspect_ratio{};
+
   float fov{};
 
   float near{};
@@ -46,9 +46,9 @@ struct Camera {
 	  world *= translation;
 
 	  math::vector up{ 0, 1, 0 };
-	  math::vector target{ 0, pitch, 1 };
+	  math::vector target{ yaw, pitch, 1 };
 
-	  const auto cameraRot = math::make_rotation_y(yaw);
+	  const auto cameraRot = math::make_rotation_y(0.f);
 
 	  auto look_dir = math::multiply(target, cameraRot);
 	  auto look_at = camera_pos + look_dir;
@@ -58,6 +58,10 @@ struct Camera {
 	  // in this case, also works without inverse. 
 	  // results in flipped normals (might be ok for this program)
 	  const auto view = math::inverse(cameraMat);
+
+	  // Every mesh is positioned on (0,0,0).
+	  // Move the mesh to its desired position by translating it by its origin.
+	  mesh.translate(math::make_translation(mesh.origin()));
 
 	  mesh.rotate(world);
 	  mesh.rotate(cameraMat);

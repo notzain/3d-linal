@@ -1,5 +1,5 @@
 set(ImGuiGit            "https://github.com/ocornut/imgui.git")
-set(ImGuiTag            "v1.66")
+set(ImGuiTag            "v1.68")
 set(ImGuiDownloadDir    ${CMAKE_CURRENT_BINARY_DIR}/ImGuiDownload)
 set(ImGuiSrcDir         ${CMAKE_CURRENT_BINARY_DIR}/ImGuiSrc)
 set(ImGuiBuildDir       ${CMAKE_CURRENT_BINARY_DIR}/ImGuiBuild)

@@ -5,6 +5,7 @@
 #include <cmath>
 
 namespace math {
+
 vector multiply(const vector &vec, const matrix &mat) {
   // clang-format off
   return {
