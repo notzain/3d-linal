@@ -62,6 +62,13 @@ public:
         }
     };
     // clang-format on
+
+    // cube isnt center on origin (0,0,0), editing the co-ordinates ^^^ is annoying
+    for (auto &polygon : quads) {
+      for (auto &vertex : polygon.vertices) {
+        vertex += math::vector(-.5, -.5, 0);
+      }
+    }
     cached = quads;
   }
 

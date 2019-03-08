@@ -71,7 +71,7 @@ struct Camera {
     mesh.rotate(cameraMat);
     mesh.project(projection);
 
-    mesh.translate(math::make_translation({1 - mesh.origin().x/2, 1 - mesh.origin().y/2, 0}));
+    mesh.translate(math::make_translation({1, 1, 0}));
     mesh.scale(math::make_scaling(
         {.5f * settings.screen_width, .5f * settings.screen_height, 0}));
   }

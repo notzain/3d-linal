@@ -57,6 +57,6 @@ int main(int argc, char **argv) {
     GUI::get().draw(&camera, {&cube, &object});
 
     engine.draw(cube);
-    // engine.draw(object);
+    engine.draw(object);
   });
 }
