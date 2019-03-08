@@ -56,20 +56,19 @@ private:
     if (ImGui::BeginTabItem("Camera")) {
       if (ImGui::CollapsingHeader("Settings")) {
         ImGui::Indent();
-        if (ImGui::SliderFloat("FOV", &camera->settings.fov, 80, 110)) {
+        if (ImGui::SliderFloat("FOV", &camera->settings.fov, 40, 200)) {
           updated = true;
         }
-        if (ImGui::SliderFloat("Near", &camera->settings.near, 0.1f, 1000.f)) {
+        if (ImGui::SliderFloat("Near", &camera->settings.near, 0.01f, 1000.f)) {
           updated = true;
         }
-        if (ImGui::SliderFloat("Far", &camera->settings.far, 0.1f, 1000.f)) {
+        if (ImGui::SliderFloat("Far", &camera->settings.far, 0.01f, 1000.f)) {
           updated = true;
         }
         ImGui::Unindent();
       }
 
-      ImGui::DragFloat("Rotation X", &camera->yaw, 0.02f);
-      ImGui::DragFloat("Rotation Y", &camera->pitch, 0.02f);
+      ImGui::DragFloat2("Camera Rotation (X, Y)", &camera->camera_direction.x, 0.02f);
 
       ImGui::DragFloat3("Camera Pos (X, Y, Z)", &camera->camera_pos.x, 0.02f);
 
