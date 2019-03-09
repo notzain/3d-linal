@@ -9,7 +9,11 @@ static struct frame_rate {
   bool unlimited = true;
 } frame_rate;
 
-static bool see_through = false;
+static struct render_settings {
+  bool wire_frame = true;
+  bool solid = false;
+  bool see_through = false;
+} render_settings;
 
 void GUI::draw_engine() {
   if (ImGui::BeginTabItem("Engine")) {
@@ -25,8 +29,16 @@ void GUI::draw_engine() {
       Engine::get().set_framerate(frame_rate.unlimited ? 0 : frame_rate.fps);
     }
 
-    if (ImGui::Checkbox("Wireframe See-Through", &see_through)) {
-      Engine::get().set_see_through(see_through);
+    if (ImGui::Checkbox("Wireframe", &render_settings.wire_frame)) {
+      Engine::get().get_render_settings().render_type ^= RenderType::WIREFRAME;
+    }
+    ImGui::SameLine();
+    if (ImGui::Checkbox("SeeThrough", &render_settings.see_through)) {
+      Engine::get().get_render_settings().see_through =
+          render_settings.see_through;
+    }
+    if (ImGui::Checkbox("Solid", &render_settings.solid)) {
+      Engine::get().get_render_settings().render_type ^= RenderType::SOLID;
     }
 
     ImGui::EndTabItem();

@@ -56,7 +56,7 @@ int main(int argc, char **argv) {
 
     GUI::get().draw(&camera, {&cube, &object});
 
-    engine.draw(RenderType::SOLID, cube);
-    //engine.draw(RenderType::SOLID, object);
+    engine.draw(cube);
+    //engine.draw(object);
   });
 }

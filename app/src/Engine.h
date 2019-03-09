@@ -9,6 +9,11 @@
 
 using GuiCallback = std::function<void()>;
 
+struct RenderSettings {
+  uint8_t render_type = RenderType::WIREFRAME;
+  bool see_through = false;
+};
+
 class Engine {
   std::string title;
   sf::RenderWindow window;
@@ -17,7 +22,8 @@ class Engine {
   float delta_time = 0;
   bool show_fps_ = true;
 
-  bool see_through = false;
+  RenderSettings render_settings;
+
   Engine() = default;
   ~Engine() = default;
 
@@ -51,7 +57,7 @@ public:
     window.setFramerateLimit(framerate);
   }
 
-  void set_see_through(bool see) { see_through = see; }
+  RenderSettings &get_render_settings() { return render_settings; }
 
   bool is_running() const { return window.isOpen(); }
 
@@ -74,18 +80,18 @@ public:
     GUI::get().update(window, time);
   }
 
-  void draw(RenderType type, const Mesh &mesh) {
-    switch (type) {
-    case RenderType::WIREFRAME: {
-      WireframeRenderer renderer(&window, see_through);
+  void draw(const Mesh &mesh) {
+    if (render_settings.render_type & RenderType::WIREFRAME &&
+        render_settings.render_type & RenderType::SOLID) {
+      WireframeAndSolidRenderer renderer(&window, render_settings.see_through);
       mesh.draw(renderer);
-    } break;
-    case RenderType::SOLID: {
+    } else if (render_settings.render_type & RenderType::WIREFRAME) {
+      WireframeRenderer renderer(&window, render_settings.see_through);
+      mesh.draw(renderer);
+    }
+    if (render_settings.render_type & RenderType::SOLID) {
       SolidRenderer renderer(&window);
       mesh.draw(renderer);
-    } break;
-    default:
-      break;
     }
   }
 

@@ -4,7 +4,10 @@
 
 #include <SFML/Graphics.hpp>
 
-enum class RenderType { WIREFRAME, SOLID };
+struct RenderType {
+  static const uint8_t WIREFRAME = 1 << 0;
+  static const uint8_t SOLID = 1 << 1;
+};
 
 class MeshRenderer {
 protected:
@@ -201,6 +204,21 @@ public:
         }
       }
     }
+  }
+  void draw(const std::vector<Triangle> &mesh, sf::Color color) override {}
+};
+
+class WireframeAndSolidRenderer : public MeshRenderer {
+  WireframeRenderer wireframe;
+  SolidRenderer solid;
+
+public:
+  WireframeAndSolidRenderer(sf::RenderWindow *window, bool see_through)
+      : MeshRenderer(window),
+        wireframe(window, see_through), solid(window) {}
+  void draw(const std::vector<Quad> &mesh, sf::Color color) override {
+    solid.draw(mesh, color);
+    wireframe.draw(mesh, sf::Color::Black);
   }
   void draw(const std::vector<Triangle> &mesh, sf::Color color) override {}
 };
