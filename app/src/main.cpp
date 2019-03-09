@@ -52,11 +52,11 @@ int main(int argc, char **argv) {
 
   engine.run([&](float dt) {
     camera.transform(cube);
-    //camera.transform(object);
+    camera.transform(object);
 
     GUI::get().draw(&camera, {&cube, &object});
 
     engine.draw(RenderType::SOLID, cube);
-    // engine.draw(RenderType::WIREFRAME, object);
+    //engine.draw(RenderType::SOLID, object);
   });
 }

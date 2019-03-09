@@ -55,6 +55,7 @@ struct Camera {
     // in this case, also works without inverse.
     // results in flipped normals (might be ok for this program)
     // const auto view = math::inverse(cameraMat);
+    const auto view = cameraMat;
 
     // rotate mesh around origin first
     mesh.rotate(math::make_rotation_x(mesh.rotation().x));
@@ -69,7 +70,7 @@ struct Camera {
 
     mesh.calc_normal();
 
-    mesh.rotate(cameraMat);
+    mesh.rotate(view);
     mesh.project(projection);
 
     mesh.translate(math::make_translation({1, 1, 0}));

@@ -149,7 +149,20 @@ public:
   SolidRenderer(sf::RenderWindow *window) : MeshRenderer(window) {}
 
   void draw(const std::vector<Quad> &mesh, sf::Color color) override {
-    for (const auto &polygon : mesh) {
+    auto sorted_polygons = mesh;
+    std::sort(sorted_polygons.begin(), sorted_polygons.end(),
+              [](const auto &a, const auto &b) {
+                float z1 = 0;
+                float z2 = 0;
+                for (const auto &vertex : a.vertices) {
+                  z1 += vertex.z;
+                }
+                for (const auto &vertex : b.vertices) {
+                  z2 += vertex.z;
+                }
+                return z1 / 4 > z2 / 4;
+              });
+    for (const auto &polygon : sorted_polygons) {
       // https://stackoverflow.com/questions/9806630/calculating-the-vertex-normals-of-a-quad
       // math::vector line_a = polygon.vertices[2] - polygon.vertices[0];
       // math::vector line_b = polygon.vertices[3] - polygon.vertices[1];
@@ -158,9 +171,8 @@ public:
       // normal.normalize();
 
       auto normal = polygon.normal.normalized();
-      normal *= -1;
 
-      if (normal.z < 0 || true) {
+      if (normal.z < 0) {
         bool valid_shape = true;
         sf::ConvexShape shape(4);
         for (int i = 0; i < 4; ++i) {
