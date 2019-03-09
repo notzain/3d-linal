@@ -1,13 +1,24 @@
 #pragma once
 
 #include "math/vector.hpp"
-#include <array>
+#include <vector>
 
-template <size_t N> struct Polygon {
-  static constexpr size_t size = N;
-  std::array<math::vector, N> vertices{};
+struct Polygon {
+  std::vector<math::vector> vertices{};
   math::vector normal{};
-};
 
-using Triangle = Polygon<3>;
-using Quad = Polygon<4>;
+  void calculate_normal() {
+    // Quad
+    if (vertices.size() == 4) {
+      const math::vector line_a = vertices[1] - vertices[0];
+      const math::vector line_b = vertices[3] - vertices[0];
+      normal = line_a.cross_product(line_b).normalized();
+    }
+    // Triangle
+    else if (vertices.size() == 3) {
+      const math::vector line_a = vertices[1] - vertices[0];
+      const math::vector line_b = vertices[2] - vertices[0];
+      normal = line_a.cross_product(line_b).normalized();
+    }
+  }
+};

@@ -4,62 +4,75 @@
 #include "math/math.hpp"
 #include <algorithm>
 
+#include <vector>
+
 class Cube : public Mesh {
-  std::vector<Quad> quads;
+  std::vector<Polygon> quads;
   math::vector origin_;
   math::vector rotation_;
 
 public:
-  mutable std::vector<Quad> cached;
+  mutable std::vector<Polygon> cached;
 
 public:
   Cube(math::vector origin = {}) {
     origin_ = origin;
     // clang-format off
     quads = {
-        // SOUTH
+      //NORTH
+      Polygon {
         {
           math::vector(0.0f, 0.0f, 0.0f),
           math::vector(0.0f, 1.0f, 0.0f),
           math::vector(1.0f, 1.0f, 0.0f),
-          math::vector(1.0f, 0.0f, 0.0f),
-        },
-        // NORTH
-        {
-          math::vector(1.0f, 0.0f, 1.0f),
-          math::vector(1.0f, 1.0f, 1.0f),
-          math::vector(0.0f, 1.0f, 1.0f),
-          math::vector(0.0f, 0.0f, 1.0f),
-        },
-        // EAST
-        {
-          math::vector(1.0f, 0.0f, 0.0f),
-          math::vector(1.0f, 1.0f, 0.0f),
-          math::vector(1.0f, 1.0f, 1.0f),
-          math::vector(1.0f, 0.0f, 1.0f),
-        },
-
-        // WEST
-        {
-          math::vector(0.0f, 0.0f, 1.0f),
-          math::vector(0.0f, 1.0f, 1.0f),
-          math::vector(0.0f, 1.0f, 0.0f),
-          math::vector(0.0f, 0.0f, 0.0f),
-        },
-        // TOP
-        {
-          math::vector(0.0f, 1.0f, 0.0f),
-          math::vector(0.0f, 1.0f, 1.0f),
-          math::vector(1.0f, 1.0f, 1.0f),
-          math::vector(1.0f, 1.0f, 0.0f),
-        },
-        // BOTTOM
-        {
-          math::vector(1.0f, 0.0f, 1.0f),
-          math::vector(0.0f, 0.0f, 1.0f),
-          math::vector(0.0f, 0.0f, 0.0f),
-          math::vector(1.0f, 0.0f, 0.0f),
+          math::vector(1.0f, 0.0f, 0.0f)
         }
+      },
+      //SOUTH
+      Polygon {
+        {
+          math::vector(1.0f, 0.0f, 1.0f),
+          math::vector(1.0f, 1.0f, 1.0f),
+          math::vector(0.0f, 1.0f, 1.0f),
+          math::vector(0.0f, 0.0f, 1.0f)
+        }
+      },
+      //EAST
+      Polygon {
+        {
+          math::vector(1.0f, 0.0f, 0.0f),
+          math::vector(1.0f, 1.0f, 0.0f),
+          math::vector(1.0f, 1.0f, 1.0f),
+          math::vector(1.0f, 0.0f, 1.0f)
+        }
+      },
+      //WEST
+      Polygon {
+        {
+          math::vector(0.0f, 0.0f, 1.0f),
+          math::vector(0.0f, 1.0f, 1.0f),
+          math::vector(0.0f, 1.0f, 0.0f),
+          math::vector(0.0f, 0.0f, 0.0f)
+        }
+      },
+      //TOP
+      Polygon {
+        {
+          math::vector(0.0f, 1.0f, 0.0f),
+          math::vector(0.0f, 1.0f, 1.0f),
+          math::vector(1.0f, 1.0f, 1.0f),
+          math::vector(1.0f, 1.0f, 0.0f)
+        }
+      },
+      //BOTTOM
+      Polygon {
+        {
+          math::vector(1.0f, 0.0f, 1.0f),
+          math::vector(0.0f, 0.0f, 1.0f),
+          math::vector(0.0f, 0.0f, 0.0f),
+          math::vector(1.0f, 0.0f, 0.0f)
+        }
+      }
     };
     // clang-format on
 
@@ -117,10 +130,7 @@ public:
 
   void calc_normal() override {
     for (auto &polygon : cached) {
-      math::vector line_a = polygon.vertices[1] - polygon.vertices[0];
-      math::vector line_b = polygon.vertices[3] - polygon.vertices[0];
-
-      polygon.normal = line_a.normalized().cross_product(line_b.normalized());
+      polygon.calculate_normal();
     }
   }
 };

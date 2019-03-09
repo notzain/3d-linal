@@ -10,6 +10,7 @@ static struct frame_rate {
 } frame_rate;
 
 static struct render_settings {
+
   bool wire_frame = true;
   bool solid = false;
   bool see_through = false;

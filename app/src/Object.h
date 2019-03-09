@@ -10,27 +10,20 @@ class Object : public Mesh {
   math::vector origin_;
   math::vector rotation_;
 
-  std::vector<Triangle> triangles;
-  mutable std::vector<Triangle> cached_triangles;
-
-  std::vector<Quad> quads;
-  mutable std::vector<Quad> cached_quads;
+  std::vector<Polygon> polygons;
+  mutable std::vector<Polygon> cached;
 
 public:
   Object(const std::string &filename) {
     load_from_file(filename);
-    cached_triangles = triangles;
-    cached_quads = quads;
+    cached = polygons;
   }
 
   void draw(MeshRenderer &renderer) const override {
-    renderer.draw(cached_quads,
-                  sf::Color(color[0] * 255, color[1] * 255, color[2] * 255));
-    renderer.draw(cached_triangles,
+    renderer.draw(cached,
                   sf::Color(color[0] * 255, color[1] * 255, color[2] * 255));
 
-    cached_quads = quads;
-    cached_triangles = triangles;
+    cached = polygons;
   }
 
   math::vector &origin() override { return origin_; }
@@ -40,53 +33,38 @@ public:
   math::vector rotation() const override { return rotation_; }
 
   void rotate(const math::matrix &matrix) override {
-    for (auto &polygon : cached_quads) {
-      for (auto &vertex : polygon.vertices) {
-        vertex = math::multiply(vertex, matrix);
-      }
-    }
-    for (auto &polygon : cached_triangles) {
+    for (auto &polygon : cached) {
       for (auto &vertex : polygon.vertices) {
         vertex = math::multiply(vertex, matrix);
       }
     }
   }
   void scale(const math::matrix &matrix) override {
-    for (auto &polygon : cached_quads) {
-      for (auto &vertex : polygon.vertices) {
-        vertex = math::multiply(vertex, matrix);
-      }
-    }
-    for (auto &polygon : cached_triangles) {
+    for (auto &polygon : cached) {
       for (auto &vertex : polygon.vertices) {
         vertex = math::multiply(vertex, matrix);
       }
     }
   }
   void translate(const math::matrix &matrix) override {
-    for (auto &polygon : cached_quads) {
-      for (auto &vertex : polygon.vertices) {
-        vertex += math::vector(matrix(3, 0), matrix(3, 1), matrix(3, 2));
-      }
-    }
-    for (auto &polygon : cached_triangles) {
+    for (auto &polygon : cached) {
       for (auto &vertex : polygon.vertices) {
         vertex += math::vector(matrix(3, 0), matrix(3, 1), matrix(3, 2));
       }
     }
   }
   void project(const math::matrix &matrix) override {
-    for (auto &polygon : cached_quads) {
+    for (auto &polygon : cached) {
       for (auto &vertex : polygon.vertices) {
         vertex = math::multiply(vertex, matrix);
         vertex = vertex / vertex.w;
       }
     }
-    for (auto &polygon : cached_triangles) {
-      for (auto &vertex : polygon.vertices) {
-        vertex = math::multiply(vertex, matrix);
-        vertex = vertex / vertex.w;
-      }
+  }
+
+  void calc_normal() override {
+    for (auto &polygon : cached) {
+      polygon.calculate_normal();
     }
   }
 
@@ -119,13 +97,13 @@ private:
         if (count == 3) {
           int f[3];
           s >> junk >> f[0] >> f[1] >> f[2];
-          triangles.push_back(
-              {verts[f[0] - 1], verts[f[1] - 1], verts[f[2] - 1]});
+          polygons.emplace_back(
+              Polygon{{verts[f[0] - 1], verts[f[1] - 1], verts[f[2] - 1]}});
         } else if (count == 4) {
           int f[4];
           s >> junk >> f[0] >> f[1] >> f[2] >> f[3];
-          quads.push_back({verts[f[0] - 1], verts[f[1] - 1], verts[f[2] - 1],
-                           verts[f[3] - 1]});
+          polygons.emplace_back(Polygon{{verts[f[0] - 1], verts[f[1] - 1],
+                                         verts[f[2] - 1], verts[f[3] - 1]}});
         }
       }
     }

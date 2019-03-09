@@ -16,74 +16,13 @@ protected:
 public:
   MeshRenderer(sf::RenderWindow *window) : window(window) {}
 
-  virtual void draw(const std::vector<Quad> &mesh, sf::Color color) = 0;
-  virtual void draw(const std::vector<Triangle> &mesh, sf::Color color) = 0;
+  virtual void draw(const std::vector<Polygon> &mesh, sf::Color color) = 0;
 
 protected:
-  static std::vector<std::array<sf::Vertex, 2>>
-  make_wireframe(const std::vector<Quad> &mesh) {
-    std::vector<std::array<sf::Vertex, 2>> wireframe;
+  math::vector normal_of(const Polygon &polygon) {
+    math::vector normal;
 
-    for (const auto &polygon : mesh) {
-      // https://stackoverflow.com/questions/9806630/calculating-the-vertex-normals-of-a-quad
-      math::vector line_a = polygon.vertices[1] - polygon.vertices[0];
-      math::vector line_b = polygon.vertices[3] - polygon.vertices[0];
-
-      auto normal = line_a.cross_product(line_b).normalized();
-
-      if (normal.z < 0) {
-        for (int i = 0; i < 4; ++i) {
-          const auto &current_vertex = polygon.vertices[i];
-          const auto &next_vertex =
-              i == 4 - 1 ? polygon.vertices[0] : polygon.vertices[i + 1];
-
-          if (current_vertex.w < 0 || next_vertex.w < 0) {
-            continue;
-          }
-
-          wireframe.push_back({sf::Vector2f{current_vertex.x, current_vertex.y},
-                               sf::Vector2f{next_vertex.x, next_vertex.y}});
-        }
-      }
-    }
-
-    return wireframe;
-  }
-
-  static std::vector<std::array<sf::Vertex, 2>>
-  make_wireframe(const std::vector<Triangle> &mesh) {
-    std::vector<std::array<sf::Vertex, 2>> wireframe;
-    return wireframe;
-  }
-
-  static std::vector<std::array<sf::Vertex, 2>>
-  make_solid(const std::vector<Quad> &mesh) {
-    std::vector<std::array<sf::Vertex, 2>> wireframe;
-
-    for (const auto &polygon : mesh) {
-      // https://stackoverflow.com/questions/9806630/calculating-the-vertex-normals-of-a-quad
-      math::vector line_a = polygon.vertices[1] - polygon.vertices[0];
-      math::vector line_b = polygon.vertices[3] - polygon.vertices[0];
-
-      auto normal = line_a.cross_product(line_b).normalized();
-
-      if (normal.z < 0) {
-        for (int i = 0; i < 4; ++i) {
-          const auto &current_vertex = polygon.vertices[i];
-          const auto &next_vertex =
-              i == 4 - 1 ? polygon.vertices[0] : polygon.vertices[i + 1];
-
-          if (current_vertex.w < 0 || next_vertex.w < 0) {
-            continue;
-          }
-
-          wireframe.push_back({sf::Vector2f{current_vertex.x, current_vertex.y},
-                               sf::Vector2f{next_vertex.x, next_vertex.y}});
-        }
-      }
-    }
-
-    return wireframe;
+    return normal;
   }
 };
 
@@ -94,20 +33,16 @@ public:
   WireframeRenderer(sf::RenderWindow *window, bool see_through)
       : MeshRenderer(window), see_through(see_through) {}
 
-  void draw(const std::vector<Quad> &mesh, sf::Color color) override {
+  void draw(const std::vector<Polygon> &mesh, sf::Color color) override {
     for (const auto &polygon : mesh) {
-      // https://stackoverflow.com/questions/9806630/calculating-the-vertex-normals-of-a-quad
-      math::vector line_a = polygon.vertices[1] - polygon.vertices[0];
-      math::vector line_b = polygon.vertices[3] - polygon.vertices[0];
-      auto normal = line_a.cross_product(line_b).normalized();
-
-      // auto normal = polygon.normal.normalized();
+      auto normal = polygon.normal.normalized();
 
       if (normal.z < 0 || see_through) {
-        for (int i = 0; i < 4; ++i) {
+        for (int i = 0; i < polygon.vertices.size(); ++i) {
           const auto &current_vertex = polygon.vertices[i];
-          const auto &next_vertex =
-              i == 4 - 1 ? polygon.vertices[0] : polygon.vertices[i + 1];
+          const auto &next_vertex = i == polygon.vertices.size() - 1
+                                        ? polygon.vertices[0]
+                                        : polygon.vertices[i + 1];
 
           if (current_vertex.w < 0 || next_vertex.w < 0) {
             continue;
@@ -122,66 +57,41 @@ public:
       }
     }
   }
-  void draw(const std::vector<Triangle> &mesh, sf::Color color) override {
-    auto lines = make_wireframe(mesh);
-
-    // erase duplicate lines
-    lines.erase(std::unique(lines.begin(), lines.end(),
-                            [](const auto &a, const auto &b) {
-                              return (a[0].position == b[0].position &&
-                                      a[1].position == b[1].position) ||
-                                     (a[0].position == b[1].position &&
-                                      a[1].position == b[0].position);
-                            }),
-                lines.end());
-
-    for (auto &line : lines) {
-      for (auto &vertex : line) {
-        vertex.color = color;
-      }
-
-      window->draw(line.data(), 2, sf::Lines);
-    }
-  }
-
-private:
 };
 
 class SolidRenderer : public MeshRenderer {
 public:
   SolidRenderer(sf::RenderWindow *window) : MeshRenderer(window) {}
 
-  void draw(const std::vector<Quad> &mesh, sf::Color color) override {
+  void draw(const std::vector<Polygon> &mesh, sf::Color color) override {
     auto sorted_polygons = mesh;
     std::sort(sorted_polygons.begin(), sorted_polygons.end(),
-              [](const auto &a, const auto &b) {
+              [](const Polygon &a, const Polygon &b) {
                 float z1 = 0;
                 float z2 = 0;
                 for (const auto &vertex : a.vertices) {
                   z1 += vertex.z;
                 }
+                z1 /= a.vertices.size();
                 for (const auto &vertex : b.vertices) {
                   z2 += vertex.z;
                 }
-                return z1 / 4 > z2 / 4;
+                z2 /= b.vertices.size();
+                return z1 > z2;
               });
+
     for (const auto &polygon : sorted_polygons) {
-      // https://stackoverflow.com/questions/9806630/calculating-the-vertex-normals-of-a-quad
-      // math::vector line_a = polygon.vertices[2] - polygon.vertices[0];
-      // math::vector line_b = polygon.vertices[3] - polygon.vertices[1];
-
-      // auto normal = line_a.normalized().cross_product(line_b.normalized());
-      // normal.normalize();
-
       auto normal = polygon.normal.normalized();
 
       if (normal.z < 0) {
         bool valid_shape = true;
-        sf::ConvexShape shape(4);
-        for (int i = 0; i < 4; ++i) {
-          const auto &current_vertex = polygon.vertices[i];
-          const auto &next_vertex =
-              i == 4 - 1 ? polygon.vertices[0] : polygon.vertices[i + 1];
+        sf::ConvexShape shape(polygon.vertices.size());
+
+        for (int i = 0; i < polygon.vertices.size(); ++i) {
+          auto current_vertex = polygon.vertices[i];
+          auto next_vertex = i == polygon.vertices.size() - 1
+                                 ? polygon.vertices[0]
+                                 : polygon.vertices[i + 1];
 
           if (current_vertex.w < 0 || next_vertex.w < 0) {
             valid_shape = false;
@@ -191,10 +101,11 @@ public:
         }
 
         if (valid_shape) {
-          math::vector light_dir{0.f, 0.f, -1.f};
+          math::vector light_dir{0.f, 0.f, -5.f};
           light_dir.normalize();
 
-          auto brightness = std::max(0.1f, normal.dot_product(light_dir));
+          auto brightness =
+              std::clamp(light_dir.dot_product(normal), 0.3f, 1.f);
 
           shape.setFillColor(sf::Color(color.r * brightness,
                                        color.g * brightness,
@@ -205,7 +116,6 @@ public:
       }
     }
   }
-  void draw(const std::vector<Triangle> &mesh, sf::Color color) override {}
 };
 
 class WireframeAndSolidRenderer : public MeshRenderer {
@@ -214,11 +124,9 @@ class WireframeAndSolidRenderer : public MeshRenderer {
 
 public:
   WireframeAndSolidRenderer(sf::RenderWindow *window, bool see_through)
-      : MeshRenderer(window),
-        wireframe(window, see_through), solid(window) {}
-  void draw(const std::vector<Quad> &mesh, sf::Color color) override {
+      : MeshRenderer(window), wireframe(window, see_through), solid(window) {}
+  void draw(const std::vector<Polygon> &mesh, sf::Color color) override {
     solid.draw(mesh, color);
     wireframe.draw(mesh, sf::Color::Black);
   }
-  void draw(const std::vector<Triangle> &mesh, sf::Color color) override {}
 };

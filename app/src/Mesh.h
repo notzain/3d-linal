@@ -5,8 +5,8 @@
 #include <array>
 #include <vector>
 
-#include "Polygon.h"
 #include "MeshRenderer.h"
+#include "Polygon.h"
 #include "math/matrix.hpp"
 
 enum class Dimension { X, Y, Z };
@@ -15,7 +15,7 @@ class Mesh {
 public:
   float color[3] = {1, 1, 1};
 
-  virtual void draw(MeshRenderer& renderer) const = 0;
+  virtual void draw(MeshRenderer &renderer) const = 0;
 
   virtual void rotate(const math::matrix &matrix) = 0;
   virtual void scale(const math::matrix &matrix) = 0;
@@ -28,5 +28,5 @@ public:
   virtual math::vector rotation() const = 0;
   virtual math::vector &rotation() = 0;
 
-  virtual void calc_normal() {};
+  virtual void calc_normal() = 0;
 };
