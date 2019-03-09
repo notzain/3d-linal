@@ -1,7 +1,7 @@
 #pragma once
 
-#include "math/math.hpp"
 #include "Mesh.h"
+#include "math/math.hpp"
 #include <fstream>
 #include <sstream>
 #include <string>
@@ -23,23 +23,14 @@ public:
     cached_quads = quads;
   }
 
-  void draw(sf::RenderTarget &target, sf::RenderStates states) const override {
-    const auto draw_cb =
-        [&target,
-         color = sf::Color(color[0] * 255, color[1] * 255, color[2] * 255)](
-            sf::Vertex *vertices, size_t num) {
-          for (int i = 0; i < num; ++i) {
-            vertices[i].color = color;
-          }
-          target.draw(vertices, num, sf::Lines);
-        };
+  void draw(MeshRenderer &renderer) const override {
+    renderer.draw(cached_quads,
+                  sf::Color(color[0] * 255, color[1] * 255, color[2] * 255));
+    renderer.draw(cached_triangles,
+                  sf::Color(color[0] * 255, color[1] * 255, color[2] * 255));
 
-    Mesh::draw(cached_triangles, draw_cb);
-    Mesh::draw(cached_quads, draw_cb);
-
-    // reset transformations
-    cached_triangles = triangles;
     cached_quads = quads;
+    cached_triangles = triangles;
   }
 
   math::vector &origin() override { return origin_; }

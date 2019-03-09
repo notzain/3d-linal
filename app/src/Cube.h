@@ -63,7 +63,8 @@ public:
     };
     // clang-format on
 
-    // cube isnt center on origin (0,0,0), editing the co-ordinates ^^^ is annoying
+    // cube isnt center on origin (0,0,0), editing the co-ordinates ^^^ is
+    // annoying
     for (auto &polygon : quads) {
       for (auto &vertex : polygon.vertices) {
         vertex += math::vector(-.5, -.5, 0);
@@ -77,18 +78,10 @@ public:
   math::vector &rotation() override { return rotation_; }
   math::vector rotation() const override { return rotation_; }
 
-  void draw(sf::RenderTarget &target, sf::RenderStates states) const override {
-    Mesh::draw(cached,
-               [&target, color = sf::Color(color[0] * 255, color[1] * 255,
-                                           color[2] * 255)](
-                   sf::Vertex *vertices, size_t num) {
-                 for (int i = 0; i < num; ++i) {
-                   vertices[i].color = color;
-                 }
-                 target.draw(vertices, 2, sf::Lines);
-               });
+  void draw(MeshRenderer &renderer) const override {
+    renderer.draw(cached,
+                  sf::Color(color[0] * 255, color[1] * 255, color[2] * 255));
 
-    // reset transformations
     cached = quads;
   }
 
@@ -119,6 +112,15 @@ public:
         vertex = math::multiply(vertex, matrix);
         vertex = vertex / vertex.w;
       }
+    }
+  }
+
+  void calc_normal() override {
+    for (auto &polygon : cached) {
+      math::vector line_a = polygon.vertices[1] - polygon.vertices[0];
+      math::vector line_b = polygon.vertices[3] - polygon.vertices[0];
+
+      polygon.normal = line_a.normalized().cross_product(line_b.normalized());
     }
   }
 };

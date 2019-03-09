@@ -25,7 +25,7 @@ struct Camera {
   math::matrix projection{};
   math::vector camera_pos{};
 
-  math::vector camera_direction{0,0,1};
+  math::vector camera_direction{0, 0, 1};
 
   Camera(const CameraSettings &settings) : settings(settings) { reconfigure(); }
 
@@ -35,13 +35,13 @@ struct Camera {
   }
 
   void transform(Mesh &mesh) {
-    //const auto rotZ = math::make_rotation_z(0.f);
-    //const auto rotX = math::make_rotation_x(0.f);
+    const auto rotZ = math::make_rotation_z(0.f);
+    const auto rotX = math::make_rotation_x(0.f);
 
-    //const auto translation = math::make_translation({0.f, 0.f, 5.f});
+    const auto translation = math::make_translation({0.f, 0.f, 5.f});
 
-    //auto world = rotZ * rotX;
-    //world *= translation;
+    auto world = rotZ * rotX;
+    world *= translation;
 
     const math::vector up{0, 1, 0};
 
@@ -54,9 +54,9 @@ struct Camera {
 
     // in this case, also works without inverse.
     // results in flipped normals (might be ok for this program)
-    const auto view = math::inverse(cameraMat);
-	
-	// rotate mesh around origin first
+    // const auto view = math::inverse(cameraMat);
+
+    // rotate mesh around origin first
     mesh.rotate(math::make_rotation_x(mesh.rotation().x));
     mesh.rotate(math::make_rotation_y(mesh.rotation().y));
     mesh.rotate(math::make_rotation_z(mesh.rotation().z));
@@ -65,8 +65,10 @@ struct Camera {
     // Move the mesh to its desired position by translating it by its origin.
     mesh.translate(math::make_translation(mesh.origin()));
 
+    mesh.rotate(world);
 
-    //mesh.rotate(world);
+    mesh.calc_normal();
+
     mesh.rotate(cameraMat);
     mesh.project(projection);
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Gui.h"
+#include "MeshRenderer.h"
 #include <SFML/Graphics.hpp>
 #include <functional>
 #include <string>
@@ -16,6 +17,7 @@ class Engine {
   float delta_time = 0;
   bool show_fps_ = true;
 
+  bool see_through = false;
   Engine() = default;
   ~Engine() = default;
 
@@ -49,6 +51,8 @@ public:
     window.setFramerateLimit(framerate);
   }
 
+  void set_see_through(bool see) { see_through = see; }
+
   bool is_running() const { return window.isOpen(); }
 
   void update() {
@@ -70,7 +74,20 @@ public:
     GUI::get().update(window, time);
   }
 
-  void draw(sf::Drawable &drawable) { window.draw(drawable); }
+  void draw(RenderType type, const Mesh &mesh) {
+    switch (type) {
+    case RenderType::WIREFRAME: {
+      WireframeRenderer renderer(&window, see_through);
+      mesh.draw(renderer);
+    } break;
+    case RenderType::SOLID: {
+      SolidRenderer renderer(&window);
+      mesh.draw(renderer);
+    } break;
+    default:
+      break;
+    }
+  }
 
   template <typename Func> void run(Func &&func) {
     while (is_running()) {

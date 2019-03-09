@@ -9,6 +9,8 @@ static struct frame_rate {
   bool unlimited = true;
 } frame_rate;
 
+static bool see_through = false;
+
 void GUI::draw_engine() {
   if (ImGui::BeginTabItem("Engine")) {
     if (ImGui::Checkbox("Show FPS", &show_fps))
@@ -21,6 +23,10 @@ void GUI::draw_engine() {
     ImGui::SameLine();
     if (ImGui::Checkbox("Unlimited", &frame_rate.unlimited)) {
       Engine::get().set_framerate(frame_rate.unlimited ? 0 : frame_rate.fps);
+    }
+
+    if (ImGui::Checkbox("Wireframe See-Through", &see_through)) {
+      Engine::get().set_see_through(see_through);
     }
 
     ImGui::EndTabItem();
