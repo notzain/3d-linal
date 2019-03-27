@@ -85,15 +85,24 @@ private:
 
       char junk;
 
+	  // vertex data
       if (line[0] == 'v') {
         math::vector v;
         s >> junk >> v.x >> v.y >> v.z;
         verts.push_back(v);
       }
 
+	  // face/polygon data
       if (line[0] == 'f') {
         const auto str = s.str();
+
+		// vertices in polygon
         auto count = std::count(str.begin(), str.end(), ' ');
+
+		/*
+		* face data: f # # # ...
+		* # = vertex index
+		*/
         if (count == 3) {
           int f[3];
           s >> junk >> f[0] >> f[1] >> f[2];

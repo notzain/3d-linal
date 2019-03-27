@@ -3,6 +3,7 @@
 #include "Polygon.h"
 
 #include <SFML/Graphics.hpp>
+#include <numeric>
 
 struct RenderType {
   static const uint8_t WIREFRAME = 1 << 0;
@@ -17,13 +18,6 @@ public:
   MeshRenderer(sf::RenderWindow *window) : window(window) {}
 
   virtual void draw(const std::vector<Polygon> &mesh, sf::Color color) = 0;
-
-protected:
-  math::vector normal_of(const Polygon &polygon) {
-    math::vector normal;
-
-    return normal;
-  }
 };
 
 class WireframeRenderer : public MeshRenderer {
@@ -64,29 +58,11 @@ public:
   SolidRenderer(sf::RenderWindow *window) : MeshRenderer(window) {}
 
   void draw(const std::vector<Polygon> &mesh, sf::Color color) override {
-    auto sorted_polygons = mesh;
-    std::sort(sorted_polygons.begin(), sorted_polygons.end(),
-              [](const Polygon &a, const Polygon &b) {
-                float z1 = 0;
-                float z2 = 0;
-                for (const auto &vertex : a.vertices) {
-                  z1 += vertex.z;
-                }
-                z1 /= a.vertices.size();
-                for (const auto &vertex : b.vertices) {
-                  z2 += vertex.z;
-                }
-                z2 /= b.vertices.size();
-                return z1 > z2;
-              });
+    std::vector<Polygon> polygons_to_draw;
 
-    for (const auto &polygon : sorted_polygons) {
-      auto normal = polygon.normal.normalized();
-
+    for (const auto &polygon : mesh) {
+      const auto &normal = polygon.normal;
       if (normal.z < 0) {
-        bool valid_shape = true;
-        sf::ConvexShape shape(polygon.vertices.size());
-
         for (int i = 0; i < polygon.vertices.size(); ++i) {
           auto current_vertex = polygon.vertices[i];
           auto next_vertex = i == polygon.vertices.size() - 1
@@ -94,26 +70,44 @@ public:
                                  : polygon.vertices[i + 1];
 
           if (current_vertex.w < 0 || next_vertex.w < 0) {
-            valid_shape = false;
             break;
           }
-          shape.setPoint(i, {current_vertex.x, current_vertex.y});
-        }
 
-        if (valid_shape) {
-          math::vector light_dir{0.f, 0.f, -5.f};
-          light_dir.normalize();
-
-          auto brightness =
-              std::clamp(light_dir.dot_product(normal), 0.3f, 1.f);
-
-          shape.setFillColor(sf::Color(color.r * brightness,
-                                       color.g * brightness,
-                                       color.b * brightness));
-
-          window->draw(shape);
+          polygons_to_draw.push_back(polygon);
         }
       }
+    }
+
+    std::sort(polygons_to_draw.begin(), polygons_to_draw.end(),
+              [](const Polygon &a, const Polygon &b) {
+                const auto z = [](float prev, const math::vector &v) {
+                  return prev + v.z;
+                };
+
+                float az = std::accumulate(a.vertices.begin(), a.vertices.end(),
+                                           0.f, z);
+                float bz = std::accumulate(b.vertices.begin(), b.vertices.end(),
+                                           0.f, z);
+
+                return az / a.vertices.size() > bz / b.vertices.size();
+              });
+
+    for (const auto &polygon : polygons_to_draw) {
+      sf::ConvexShape shape(polygon.vertices.size());
+      for (int i = 0; i < polygon.vertices.size(); ++i) {
+        shape.setPoint(i, {polygon.vertices[i].x, polygon.vertices[i].y});
+      }
+
+      auto normal = polygon.normal;
+      math::vector light_dir{0.f, 0.f, -5.f};
+      light_dir.normalize();
+
+      auto brightness = std::clamp(light_dir.dot_product(normal), 0.3f, 1.f);
+
+      shape.setFillColor(sf::Color(color.r * brightness, color.g * brightness,
+                                   color.b * brightness));
+
+      window->draw(shape);
     }
   }
 };

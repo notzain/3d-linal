@@ -80,6 +80,8 @@ public:
     GUI::get().update(window, time);
   }
 
+  sf::Vector2i mouse_position() const { return sf::Mouse::getPosition(window); }
+
   void draw(const Mesh &mesh) {
     if (render_settings.render_type & RenderType::WIREFRAME &&
         render_settings.render_type & RenderType::SOLID) {

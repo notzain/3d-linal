@@ -23,15 +23,31 @@ struct Camera {
   CameraSettings settings{};
 
   math::matrix projection{};
-  math::vector camera_pos{};
-
-  math::vector camera_direction{0, 0, 1};
+  math::vector position{};
+  math::vector direction{0, 0, 1};
+  const math::vector up{0, 1, 0};
 
   Camera(const CameraSettings &settings) : settings(settings) { reconfigure(); }
 
   void reconfigure() {
     projection = math::make_projection(settings.fov, settings.aspect_ratio,
                                        settings.near, settings.far);
+  }
+
+  void move_forward(float dt) { position += direction * dt; }
+  void move_sideways(float dt) {
+    position += (direction.cross_product(up) * dt);
+  }
+
+  void look_at(float yaw, float pitch) {
+    pitch = std::clamp(pitch, -89.f, 89.f);
+
+    const auto front =
+        math::vector{cos(math::to_radians(yaw)) * cos(math::to_radians(pitch)),
+                     sin(math::to_radians(pitch)),
+                     sin(math::to_radians(yaw)) * cos(math::to_radians(pitch))};
+
+	direction = front.normalized();
   }
 
   void transform(Mesh &mesh) {
@@ -43,18 +59,12 @@ struct Camera {
     auto world = rotZ * rotX;
     world *= translation;
 
-    const math::vector up{0, 1, 0};
-
-    const auto camera_rotation = math::make_rotation_y(0.f);
-
-    auto look_dir = math::multiply(camera_direction, camera_rotation);
-    auto look_at = camera_pos + camera_direction.normalized();
-
-    const auto cameraMat = math::point_at(camera_pos, look_at, up);
+    const auto look_at = position + direction;
+    const auto view = math::inverse(math::point_at(position, look_at, up));
 
     // in this case, also works without inverse.
     // results in flipped normals (might be ok for this program)
-    const auto view = math::inverse(cameraMat);
+    // const auto view = math::inverse(cameraMat);
     // const auto view = cameraMat;
 
     // rotate mesh around origin first

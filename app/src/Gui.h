@@ -68,9 +68,9 @@ private:
         ImGui::Unindent();
       }
 
-      ImGui::DragFloat2("Camera Rotation (X, Y)", &camera->camera_direction.x, 0.02f);
+      ImGui::DragFloat2("Camera Rotation (X, Y)", &camera->direction.x, 0.02f);
 
-      ImGui::DragFloat3("Camera Pos (X, Y, Z)", &camera->camera_pos.x, 0.02f);
+      ImGui::DragFloat3("Camera Pos (X, Y, Z)", &camera->position.x, 0.02f);
 
       ImGui::EndTabItem();
     }

@@ -82,7 +82,7 @@ matrix make_scaling(const math::vector &scale) {
 }
 
 matrix make_projection(float fov, float aspect_ratio, float near, float far) {
-  const float fov_radians = 1.f / tanf(fov * 0.5f / 180 * M_PI);
+  const float fov_radians = to_radians(fov / 2);
 
   matrix matrix;
   matrix(0, 0) = aspect_ratio * fov_radians;
@@ -152,5 +152,7 @@ matrix point_at(const math::vector &pos, const math::vector &target,
 }
 
 float dot_product(const vector &a, const vector &b) { return a.dot_product(b); }
+
+float to_radians(float degrees) { return (degrees * M_PI) / 180; }
 
 } // namespace math
