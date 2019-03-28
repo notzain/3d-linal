@@ -25,19 +25,21 @@ int main(int argc, char **argv) {
 
   Camera camera({screenwidth, screenheight, screenheight / screenheight, 90.f,
                  0.1f, 1000.f});
+  // camera.follow(&cube);
 
   const auto has_pressed = [](sf::Keyboard::Key key) -> bool {
     return sf::Keyboard::isKeyPressed(key);
   };
 
   sf::Vector2i last_mouse_pos(screenwidth / 2, screenheight / 2);
-  float yaw = -90.f;
+  float yaw = 0.f;
   float pitch = 0.f;
 
   engine.run([&](float dt) {
     using Key = sf::Keyboard;
-    const auto MOVEMENT = 2;
+    const auto MOVEMENT = 5;
     const auto D_MOVEMENT = MOVEMENT * dt;
+    const auto LOOK = 50 * dt;
 
     // WASD - Look direction
     if (has_pressed(Key::W)) {
@@ -53,19 +55,34 @@ int main(int argc, char **argv) {
       camera.move_sideways(-D_MOVEMENT);
     }
 
-    const auto mouse_pos = engine.mouse_position();
-    float xoffset = last_mouse_pos.x - mouse_pos.x;
-    float yoffset = last_mouse_pos.y - mouse_pos.y;
+    if (has_pressed(Key::Up)) {
+      camera.look_vertical(-LOOK);
+    }
+    if (has_pressed(Key::Down)) {
+      camera.look_vertical(LOOK);
+    }
+    if (has_pressed(Key::Left)) {
+      camera.look_horizontal(LOOK);
+    }
+    if (has_pressed(Key::Right)) {
+      camera.look_horizontal(-LOOK);
+    }
 
-    xoffset *= 0.5;
-    yoffset *= -0.5;
+    /*
+        const auto mouse_pos = engine.mouse_position();
+        float xoffset = last_mouse_pos.x - mouse_pos.x;
+        float yoffset = last_mouse_pos.y - mouse_pos.y;
 
-    yaw += xoffset;
-    pitch += yoffset;
+        xoffset *= engine.mouse_sensitivity();
+        yoffset *= -engine.mouse_sensitivity();
 
-    camera.look_at(yaw, pitch);
+        yaw += xoffset;
+        pitch += yoffset;
 
-    last_mouse_pos = mouse_pos;
+        camera.look_at(yaw, pitch);
+
+        last_mouse_pos = mouse_pos;
+    */
 
     camera.transform(cube);
     camera.transform(object);

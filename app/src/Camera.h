@@ -21,12 +21,15 @@ struct CameraSettings {
 // https://learnopengl.com/Getting-started/Camera
 struct Camera {
   CameraSettings settings{};
-
   math::matrix projection{};
   math::vector position{};
   math::vector direction{0, 0, 1};
   const math::vector up{0, 1, 0};
 
+  const Mesh *to_follow = nullptr;
+
+  float yaw = 90.f;
+  float pitch{};
   Camera(const CameraSettings &settings) : settings(settings) { reconfigure(); }
 
   void reconfigure() {
@@ -38,17 +41,14 @@ struct Camera {
   void move_sideways(float dt) {
     position += (direction.cross_product(up) * dt);
   }
-
-  void look_at(float yaw, float pitch) {
+  void look_vertical(float dt) {
+    pitch += dt;
     pitch = std::clamp(pitch, -89.f, 89.f);
-
-    const auto front =
-        math::vector{cos(math::to_radians(yaw)) * cos(math::to_radians(pitch)),
-                     sin(math::to_radians(pitch)),
-                     sin(math::to_radians(yaw)) * cos(math::to_radians(pitch))};
-
-	direction = front.normalized();
   }
+
+  void look_horizontal(float dt) { yaw += dt; }
+
+  void follow(const Mesh *target) { to_follow = target; }
 
   void transform(Mesh &mesh) {
     const auto rotZ = math::make_rotation_z(0.f);
@@ -59,8 +59,16 @@ struct Camera {
     auto world = rotZ * rotX;
     world *= translation;
 
+    const auto front =
+        math::vector{cos(math::to_radians(yaw)) * cos(math::to_radians(pitch)),
+                     sin(math::to_radians(pitch)),
+                     sin(math::to_radians(yaw)) * cos(math::to_radians(pitch))};
+
+    direction = front.normalized();
+
     const auto look_at = position + direction;
-    const auto view = math::inverse(math::point_at(position, look_at, up));
+    const auto view = math::inverse(math::point_at(
+        position, to_follow ? to_follow->origin() : look_at, up));
 
     // in this case, also works without inverse.
     // results in flipped normals (might be ok for this program)

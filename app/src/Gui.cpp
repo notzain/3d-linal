@@ -9,11 +9,13 @@ static struct frame_rate {
   bool unlimited = true;
 } frame_rate;
 
+static float mouse_sensitivity = .5f;
+
 static struct render_settings {
 
   bool wire_frame = true;
   bool solid = false;
-  bool see_through = false;
+  bool see_through = true;
 } render_settings;
 
 void GUI::draw_engine() {
@@ -28,6 +30,10 @@ void GUI::draw_engine() {
     ImGui::SameLine();
     if (ImGui::Checkbox("Unlimited", &frame_rate.unlimited)) {
       Engine::get().set_framerate(frame_rate.unlimited ? 0 : frame_rate.fps);
+    }
+
+    if (ImGui::SliderFloat("Mouse sensitivity", &mouse_sensitivity, 0.f, 1.f)) {
+      Engine::get().set_mouse_sensitivyt(mouse_sensitivity);
     }
 
     if (ImGui::Checkbox("Wireframe", &render_settings.wire_frame)) {

@@ -11,7 +11,7 @@ using GuiCallback = std::function<void()>;
 
 struct RenderSettings {
   uint8_t render_type = RenderType::WIREFRAME;
-  bool see_through = false;
+  bool see_through = true;
 };
 
 class Engine {
@@ -19,9 +19,9 @@ class Engine {
   sf::RenderWindow window;
   sf::Clock clock;
 
+  float _mouse_sensitivity = .5f;
   float delta_time = 0;
   bool show_fps_ = true;
-
   RenderSettings render_settings;
 
   Engine() = default;
@@ -39,6 +39,9 @@ public:
 
     GUI::get().init(window);
   }
+
+  float mouse_sensitivity() const { return _mouse_sensitivity / 10; }
+  void set_mouse_sensitivyt(float value) { _mouse_sensitivity = value; }
 
   void set_title(const std::string &title) {
     this->title = title;
@@ -80,7 +83,7 @@ public:
     GUI::get().update(window, time);
   }
 
-  sf::Vector2i mouse_position() const { return sf::Mouse::getPosition(window); }
+  sf::Vector2i mouse_position() const { return sf::Mouse::getPosition(); }
 
   void draw(const Mesh &mesh) {
     if (render_settings.render_type & RenderType::WIREFRAME &&
@@ -97,13 +100,13 @@ public:
     }
   }
 
-  template <typename Func> void run(Func &&func) {
+  void run(std::function<void(float)> onUpdate) {
     while (is_running()) {
       window.clear();
 
       update();
 
-      func(delta_time);
+      onUpdate(delta_time);
 
       GUI::get().display(window);
       window.display();
