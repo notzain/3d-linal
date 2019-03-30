@@ -13,6 +13,7 @@
 #include "Engine.h"
 #include "Gui.h"
 #include "Object.h"
+#include "Spaceship.h"
 
 int main(int argc, char **argv) {
   float screenwidth = 1280;
@@ -24,6 +25,7 @@ int main(int argc, char **argv) {
   Cube cube;
   Object object("objs/axis.obj");
   Bullet bullet({}, {});
+  Spaceship ship("objs/spaceship.obj");
 
   FreeCamera free_cam({screenwidth, screenheight, screenheight / screenheight,
                        90.f, 0.1f, 1000.f});
@@ -100,14 +102,22 @@ int main(int argc, char **argv) {
         last_mouse_pos = mouse_pos;
     */
 
+    if (cube.checkAABB(ship)) {
+      cube.color[0] = 0;
+    } else {
+      cube.color[0] = 1;
+    }
+
     cameras[current_cam]->transform(cube);
     cameras[current_cam]->transform(object);
     cameras[current_cam]->transform(bullet);
+    cameras[current_cam]->transform(ship);
 
-    GUI::get().draw(current_cam, cameras, {&cube, &object, &bullet});
+    GUI::get().draw(current_cam, cameras, {&cube, &object, &bullet, &ship});
 
     engine.draw(cube);
     engine.draw(object);
     engine.draw(bullet);
+    engine.draw(ship);
   });
 }

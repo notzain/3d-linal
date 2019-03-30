@@ -7,7 +7,7 @@ class Bullet : public Mesh {
 
   math::vector origin_;
   math::vector rotation_;
-  math::vector scale_{1, 1, 1};
+  math::vector scale_{0, 0, 4};
 
   std::vector<Polygon> polygons;
   mutable std::vector<Polygon> cached;
@@ -17,7 +17,6 @@ public:
 
     origin_ = start;
     rotation_ = direction;
-    scale_ = {0, 0, 4};
 
     polygons = {
         // NORTH
@@ -45,6 +44,12 @@ public:
                  math::vector(0.0f, 0.0f, 0.0f),
                  math::vector(1.0f, 0.0f, 0.0f)}}};
     // clang-format on
+
+    for (auto &polygon : polygons) {
+      for (auto &vertex : polygon.vertices) {
+        vertex += math::vector(-.5, -.5, 0);
+      }
+    }
     cached = polygons;
   }
 

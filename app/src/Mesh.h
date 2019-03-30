@@ -3,6 +3,7 @@
 #include <SFML/Graphics.hpp>
 #include <algorithm>
 #include <array>
+#include <cmath>
 #include <vector>
 
 #include "MeshRenderer.h"
@@ -34,4 +35,17 @@ public:
   virtual Polygon front() const { return {}; }
 
   virtual void calc_normal() = 0;
+
+  virtual bool checkAABB(const Mesh &other) {
+    if (fabs(origin().x - other.origin().x) < scaling().x + other.scaling().x) {
+      if (fabs(origin().y - other.origin().y) <
+          scaling().y + other.scaling().y) {
+        if (fabs(origin().z - other.origin().z) <
+            scaling().z + other.scaling().z) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
 };
