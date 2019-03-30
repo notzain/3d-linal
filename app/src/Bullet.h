@@ -7,12 +7,14 @@ class Bullet : public Mesh {
 
   math::vector origin_;
   math::vector rotation_;
-  math::vector scale_{0, 0, 4};
-
+  math::vector scale_{0, 0, 1};
+  math::vector direction_{0, 0, 1};
   std::vector<Polygon> polygons;
   mutable std::vector<Polygon> cached;
 
 public:
+  float velocity = 5;
+
   Bullet(math::vector start, math::vector direction) {
 
     origin_ = start;
@@ -51,6 +53,15 @@ public:
       }
     }
     cached = polygons;
+  }
+
+  void update(float dt) {
+    auto direction =
+        math::multiply(direction_, math::make_rotation_x(rotation_.x));
+    direction = math::multiply(direction, math::make_rotation_y(rotation_.y));
+    direction = math::multiply(direction, math::make_rotation_z(rotation_.z));
+    direction.normalize();
+    origin_ += direction * velocity * dt;
   }
 
   void draw(MeshRenderer &renderer) const override {

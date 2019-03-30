@@ -26,6 +26,7 @@ int main(int argc, char **argv) {
   Object object("objs/axis.obj");
   Bullet bullet({}, {});
   Spaceship ship("objs/spaceship.obj");
+  std::vector<Bullet> bullets;
 
   FreeCamera free_cam({screenwidth, screenheight, screenheight / screenheight,
                        90.f, 0.1f, 1000.f});
@@ -86,6 +87,10 @@ int main(int argc, char **argv) {
       cameras[current_cam]->look_horizontal(-LOOK);
     }
 
+    if (has_pressed(Key::Space)) {
+      bullets.push_back(ship.shoot());
+    }
+
     /*
         const auto mouse_pos = engine.mouse_position();
         float xoffset = last_mouse_pos.x - mouse_pos.x;
@@ -102,10 +107,15 @@ int main(int argc, char **argv) {
         last_mouse_pos = mouse_pos;
     */
 
-    if (cube.checkAABB(ship)) {
+    if (cube.checkAABB(bullet)) {
       cube.color[0] = 0;
     } else {
       cube.color[0] = 1;
+    }
+
+    for (auto &b : bullets) {
+      b.update(dt);
+      cameras[current_cam]->transform(b);
     }
 
     cameras[current_cam]->transform(cube);
@@ -115,9 +125,24 @@ int main(int argc, char **argv) {
 
     GUI::get().draw(current_cam, cameras, {&cube, &object, &bullet, &ship});
 
+    for (auto &b : bullets) {
+      engine.draw(b);
+    }
     engine.draw(cube);
-    engine.draw(object);
-    engine.draw(bullet);
+    // engine.draw(object);
     engine.draw(ship);
+
+    bullets.erase(std::remove_if(bullets.begin(), bullets.end(),
+                                 [](const Bullet &b) {
+                                   if (b.origin().x > 10 || b.origin().x < -10)
+                                     return true;
+                                   if (b.origin().y > 10 || b.origin().y < -10)
+                                     return true;
+                                   if (b.origin().z > 10 || b.origin().z < -10)
+                                     return true;
+
+                                   return false;
+                                 }),
+                  bullets.end());
   });
 }

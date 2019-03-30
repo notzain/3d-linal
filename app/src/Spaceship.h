@@ -9,25 +9,43 @@
 
 class Spaceship : public Object {
   Polygon *front_ = nullptr;
-  Bullet bullet_;
-  float velocity = 1;
 
 public:
-  Spaceship(const std::string &filename) : Object(filename), bullet_({}, {}) {
-    float total_x = 0;
-    float total_y = 0;
-    int total_v = 0;
+  Spaceship(const std::string &filename) : Object(filename) {
+    /**/
+    polygons = {
+        // NORTH
+        Polygon{{math::vector(0.0f, 0.0f, 0.0f), math::vector(0.0f, 1.0f, 0.0f),
+                 math::vector(1.0f, 1.0f, 0.0f),
+                 math::vector(1.0f, 0.0f, 0.0f)}},
+        // SOUTH
+        Polygon{{math::vector(1.0f, 0.0f, 1.0f), math::vector(1.0f, 1.0f, 1.0f),
+                 math::vector(0.0f, 1.0f, 1.0f),
+                 math::vector(0.0f, 0.0f, 1.0f)}},
+        // EAST
+        Polygon{{math::vector(1.0f, 0.0f, 0.0f), math::vector(1.0f, 1.0f, 0.0f),
+                 math::vector(1.0f, 1.0f, 1.0f),
+                 math::vector(1.0f, 0.0f, 1.0f)}},
+        // WEST
+        Polygon{{math::vector(0.0f, 0.0f, 1.0f), math::vector(0.0f, 1.0f, 1.0f),
+                 math::vector(0.0f, 1.0f, 0.0f),
+                 math::vector(0.0f, 0.0f, 0.0f)}},
+        // TOP
+        Polygon{{math::vector(0.0f, 1.0f, 0.0f), math::vector(0.0f, 1.0f, 1.0f),
+                 math::vector(1.0f, 1.0f, 1.0f),
+                 math::vector(1.0f, 1.0f, 0.0f)}},
+        // BOTTOM
+        Polygon{{math::vector(1.0f, 0.0f, 1.0f), math::vector(0.0f, 0.0f, 1.0f),
+                 math::vector(0.0f, 0.0f, 0.0f),
+                 math::vector(1.0f, 0.0f, 0.0f)}}};
 
-    for (const auto &p : cached) {
-      for (const auto &v : p.vertices) {
-        total_x += v.x;
-        total_y += v.y;
-        total_v++;
+    for (auto &polygon : polygons) {
+      for (auto &vertex : polygon.vertices) {
+        vertex += math::vector(-.5, -.5, 0);
       }
     }
 
-    float avg_x = total_x / total_v;
-    float avg_y = total_y / total_v;
+    cached = polygons;
 
     front_ = &*std::min_element(
         cached.begin(), cached.end(), [](const Polygon &a, const Polygon &b) {
@@ -44,9 +62,6 @@ public:
 
           return z_a > z_b;
         });
-
-    bullet_.color[1] = 0;
-    bullet_.color[2] = 0;
   }
   Polygon front() const override { return *front_; }
 
@@ -56,18 +71,19 @@ public:
         sinf(rotation().y),
         sinf(math::to_radians(90) + rotation().x) * cosf(rotation().y)};
     const auto direction = front.normalized();
-    origin_ += (direction * velocity * dt);
   }
 
-  void shoot() {
+  Bullet shoot() {
     const auto front = math::vector{cosf(rotation().x) * cosf(rotation().y),
                                     sinf(rotation().y),
                                     sinf(rotation().x) * cosf(rotation().y)};
     const auto direction = front.normalized();
+
+    return {origin(), rotation()};
   }
 
   void draw(MeshRenderer &renderer) const override {
-    bullet_.draw(renderer);
+
     renderer.draw(cached,
                   sf::Color(color[0] * 255, color[1] * 255, color[2] * 255));
 
@@ -75,8 +91,6 @@ public:
   }
 
   void rotate(const math::matrix &matrix) override {
-    bullet_.rotate(matrix);
-
     for (auto &polygon : cached) {
       for (auto &vertex : polygon.vertices) {
         vertex = math::multiply(vertex, matrix);
@@ -84,8 +98,6 @@ public:
     }
   }
   void scale(const math::matrix &matrix) override {
-    bullet_.scale(matrix);
-
     for (auto &polygon : cached) {
       for (auto &vertex : polygon.vertices) {
         vertex = math::multiply(vertex, matrix);
@@ -93,8 +105,6 @@ public:
     }
   }
   void translate(const math::matrix &matrix) override {
-    bullet_.translate(matrix);
-
     for (auto &polygon : cached) {
       for (auto &vertex : polygon.vertices) {
         vertex += math::vector(matrix(3, 0), matrix(3, 1), matrix(3, 2));
@@ -102,8 +112,6 @@ public:
     }
   }
   void project(const math::matrix &matrix) override {
-    bullet_.project(matrix);
-
     for (auto &polygon : cached) {
       for (auto &vertex : polygon.vertices) {
         vertex = math::multiply(vertex, matrix);
