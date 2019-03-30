@@ -10,9 +10,10 @@ class Cube : public Mesh {
   std::vector<Polygon> quads;
   math::vector origin_;
   math::vector rotation_;
-
-public:
+  math::vector scale_{1, 1, 1};
   mutable std::vector<Polygon> cached;
+
+  Polygon *front_;
 
 public:
   Cube(math::vector origin = {}) {
@@ -84,12 +85,32 @@ public:
       }
     }
     cached = quads;
+
+    front_ = &*std::max_element(
+        cached.begin(), cached.end(), [](const Polygon &a, const Polygon &b) {
+          float z_a =
+              std::accumulate(a.vertices.begin(), a.vertices.end(), 0.f,
+                              [](float begin, const math::vector &vert) {
+                                return begin + vert.z;
+                              });
+          float z_b =
+              std::accumulate(b.vertices.begin(), b.vertices.end(), 0.f,
+                              [](float begin, const math::vector &vert) {
+                                return begin + vert.z;
+                              });
+
+          return z_a > z_b;
+        });
   }
 
   math::vector &origin() override { return origin_; }
   math::vector origin() const override { return origin_; }
   math::vector &rotation() override { return rotation_; }
   math::vector rotation() const override { return rotation_; }
+
+  math::vector &scaling() override { return scale_; }
+  math::vector scaling() const override { return scale_; }
+  Polygon front() const override { return *front_; }
 
   void draw(MeshRenderer &renderer) const override {
     renderer.draw(cached,

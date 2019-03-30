@@ -28,5 +28,10 @@ public:
   virtual math::vector rotation() const = 0;
   virtual math::vector &rotation() = 0;
 
+  virtual math::vector &scaling() = 0;
+  virtual math::vector scaling() const = 0;
+
+  virtual Polygon front() const { return {}; }
+
   virtual void calc_normal() = 0;
 };

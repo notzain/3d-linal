@@ -31,12 +31,12 @@ public:
 
   void display(sf::RenderWindow &window) { ImGui::SFML::Render(window); }
 
-  void draw(Camera *camera, const std::vector<Mesh *> &mesh) {
+  void draw(int &currentcam, Camera **camera, const std::vector<Mesh *> &mesh) {
     ImGui::Begin("extra punten");
 
     if (ImGui::BeginTabBar("Test")) {
       draw_engine();
-      draw_camera(camera);
+      draw_camera(currentcam, camera, 3);
       draw_mesh(mesh);
 
       ImGui::EndTabBar();
@@ -48,29 +48,36 @@ public:
 private:
   void draw_engine();
 
-  void draw_camera(Camera *camera) {
+  void draw_camera(int &current, Camera **camera, int size) {
     if (camera == nullptr)
       return;
 
     bool updated = false;
     if (ImGui::BeginTabItem("Camera")) {
+      const char *text[] = {"Free", "Follow", "Bird"};
+      ImGui::Combo("Cameras", &current, text, size);
+
       if (ImGui::CollapsingHeader("Settings")) {
         ImGui::Indent();
-        if (ImGui::SliderFloat("FOV", &camera->settings.fov, 40, 200)) {
+        if (ImGui::SliderFloat("FOV", &camera[current]->settings.fov, 40,
+                               200)) {
           updated = true;
         }
-        if (ImGui::SliderFloat("Near", &camera->settings.near, 0.01f, 1000.f)) {
+        if (ImGui::SliderFloat("Near", &camera[current]->settings.near, 0.01f,
+                               1000.f)) {
           updated = true;
         }
-        if (ImGui::SliderFloat("Far", &camera->settings.far, 0.01f, 1000.f)) {
+        if (ImGui::SliderFloat("Far", &camera[current]->settings.far, 0.01f,
+                               1000.f)) {
           updated = true;
         }
         ImGui::Unindent();
       }
 
-      ImGui::DragFloat2("Camera Rotation (X, Y)", &camera->yaw, 0.02f);
+      ImGui::DragFloat2("Camera Rotation (X, Y)", &camera[current]->yaw, 0.02f);
 
-      ImGui::DragFloat3("Camera Pos (X, Y, Z)", &camera->position.x, 0.02f);
+      ImGui::DragFloat3("Camera Pos (X, Y, Z)", &camera[current]->position.x,
+                        0.02f);
 
       ImGui::EndTabItem();
     }
@@ -79,7 +86,7 @@ private:
     // 0.02f);
 
     if (updated)
-      camera->reconfigure();
+      camera[current]->reconfigure();
   }
 
   void draw_mesh(const std::vector<Mesh *> &meshes) {
@@ -90,6 +97,7 @@ private:
                             0.02f);
           ImGui::DragFloat3("Rotation (X, Y, Z)", &meshes[i]->rotation().x,
                             0.02f);
+          ImGui::DragFloat3("Scale (X, Y, Z)", &meshes[i]->scaling().x, 0.02f);
 
           ImGui::ColorEdit3("Color", meshes[i]->color);
           ImGui::TreePop();

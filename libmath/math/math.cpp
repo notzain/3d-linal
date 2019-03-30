@@ -154,5 +154,6 @@ matrix point_at(const math::vector &pos, const math::vector &target,
 float dot_product(const vector &a, const vector &b) { return a.dot_product(b); }
 
 float to_radians(float degrees) { return (degrees * M_PI) / 180; }
+float to_degrees(float radians) { return (radians * 180) / M_PI; }
 
 } // namespace math

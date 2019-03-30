@@ -10,7 +10,7 @@ public:
   float &operator()(size_t x, size_t y);
   float operator()(size_t x, size_t y) const;
 
-  matrix &operator*=(const matrix& other);
-  matrix operator*(const matrix& other) const;
+  matrix &operator*=(const matrix &other);
+  matrix operator*(const matrix &other) const;
 };
 } // namespace math

@@ -2,12 +2,9 @@
 
 #include "Mesh.h"
 #include "math/math.hpp"
-#include <fstream>
-#include <sstream>
-#include <string>
 
-class Object : public Mesh {
-protected:
+class Bullet : public Mesh {
+
   math::vector origin_;
   math::vector rotation_;
   math::vector scale_{1, 1, 1};
@@ -16,8 +13,38 @@ protected:
   mutable std::vector<Polygon> cached;
 
 public:
-  Object(const std::string &filename) {
-    load_from_file(filename);
+  Bullet(math::vector start, math::vector direction) {
+
+    origin_ = start;
+    rotation_ = direction;
+    scale_ = {0, 0, 4};
+
+    polygons = {
+        // NORTH
+        Polygon{{math::vector(0.0f, 0.0f, 0.0f), math::vector(0.0f, 1.0f, 0.0f),
+                 math::vector(1.0f, 1.0f, 0.0f),
+                 math::vector(1.0f, 0.0f, 0.0f)}},
+        // SOUTH
+        Polygon{{math::vector(1.0f, 0.0f, 1.0f), math::vector(1.0f, 1.0f, 1.0f),
+                 math::vector(0.0f, 1.0f, 1.0f),
+                 math::vector(0.0f, 0.0f, 1.0f)}},
+        // EAST
+        Polygon{{math::vector(1.0f, 0.0f, 0.0f), math::vector(1.0f, 1.0f, 0.0f),
+                 math::vector(1.0f, 1.0f, 1.0f),
+                 math::vector(1.0f, 0.0f, 1.0f)}},
+        // WEST
+        Polygon{{math::vector(0.0f, 0.0f, 1.0f), math::vector(0.0f, 1.0f, 1.0f),
+                 math::vector(0.0f, 1.0f, 0.0f),
+                 math::vector(0.0f, 0.0f, 0.0f)}},
+        // TOP
+        Polygon{{math::vector(0.0f, 1.0f, 0.0f), math::vector(0.0f, 1.0f, 1.0f),
+                 math::vector(1.0f, 1.0f, 1.0f),
+                 math::vector(1.0f, 1.0f, 0.0f)}},
+        // BOTTOM
+        Polygon{{math::vector(1.0f, 0.0f, 1.0f), math::vector(0.0f, 0.0f, 1.0f),
+                 math::vector(0.0f, 0.0f, 0.0f),
+                 math::vector(1.0f, 0.0f, 0.0f)}}};
+    // clang-format on
     cached = polygons;
   }
 
@@ -70,63 +97,6 @@ public:
   void calc_normal() override {
     for (auto &polygon : cached) {
       polygon.calculate_normal();
-    }
-  }
-
-private:
-  void load_from_file(const std::string &filename) {
-    std::ifstream f(filename);
-    if (!f.is_open())
-      throw "Couldn't open file.";
-    // Local cache of verts
-    std::vector<math::vector> verts;
-
-    while (!f.eof()) {
-      char line[128];
-      f.getline(line, 128);
-
-      std::stringstream s;
-      s << line;
-
-      char junk;
-
-      /* vertex data
-       * v x y z
-       * store vertices in an array,
-       * which can later be retrieved by index (1 based)
-       */
-      if (line[0] == 'v') {
-        math::vector v;
-        s >> junk >> v.x >> v.y >> v.z;
-        verts.push_back(v);
-      }
-
-      // face/polygon data
-      if (line[0] == 'f') {
-        const auto str = s.str();
-
-        // vertices in polygon
-        auto count = std::count(str.begin(), str.end(), ' ');
-
-        /* face data: f # # # ...
-         * # = vertex index
-         */
-        if (count == 2) {
-          int f[2];
-          s >> junk >> f[0] >> f[1];
-          polygons.emplace_back(Polygon{{verts[f[0] - 1], verts[f[1] - 1]}});
-        } else if (count == 3) {
-          int f[3];
-          s >> junk >> f[0] >> f[1] >> f[2];
-          polygons.emplace_back(
-              Polygon{{verts[f[0] - 1], verts[f[1] - 1], verts[f[2] - 1]}});
-        } else if (count == 4) {
-          int f[4];
-          s >> junk >> f[0] >> f[1] >> f[2] >> f[3];
-          polygons.emplace_back(Polygon{{verts[f[0] - 1], verts[f[1] - 1],
-                                         verts[f[2] - 1], verts[f[3] - 1]}});
-        }
-      }
     }
   }
 };

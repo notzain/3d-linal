@@ -7,6 +7,7 @@
 #include <math/math.hpp>
 #include <vector>
 
+#include "Bullet.h"
 #include "Camera.h"
 #include "Cube.h"
 #include "Engine.h"
@@ -22,9 +23,18 @@ int main(int argc, char **argv) {
 
   Cube cube;
   Object object("objs/axis.obj");
+  Bullet bullet({}, {});
 
-  Camera camera({screenwidth, screenheight, screenheight / screenheight, 90.f,
-                 0.1f, 1000.f});
+  FreeCamera free_cam({screenwidth, screenheight, screenheight / screenheight,
+                       90.f, 0.1f, 1000.f});
+  FollowCamera follow_cam({screenwidth, screenheight,
+                           screenheight / screenheight, 90.f, 0.1f, 1000.f},
+                          &cube);
+  BirdCamera bird_cam({screenwidth, screenheight, screenheight / screenheight,
+                       90.f, 0.1f, 1000.f});
+
+  Camera *cameras[] = {&free_cam, &follow_cam, &bird_cam};
+  int current_cam = 0;
   // camera.follow(&cube);
 
   const auto has_pressed = [](sf::Keyboard::Key key) -> bool {
@@ -39,33 +49,39 @@ int main(int argc, char **argv) {
     using Key = sf::Keyboard;
     const auto MOVEMENT = 5;
     const auto D_MOVEMENT = MOVEMENT * dt;
-    const auto LOOK = 50 * dt;
+    const auto LOOK = 100 * dt;
+
+    if (has_pressed(Key::Tab)) {
+      current_cam++;
+      if (current_cam > 1)
+        current_cam = 0;
+    }
 
     // WASD - Look direction
     if (has_pressed(Key::W)) {
-      camera.move_forward(D_MOVEMENT);
+      cameras[current_cam]->move_forward(D_MOVEMENT);
     }
     if (has_pressed(Key::S)) {
-      camera.move_forward(-D_MOVEMENT);
+      cameras[current_cam]->move_forward(-D_MOVEMENT);
     }
     if (has_pressed(Key::A)) {
-      camera.move_sideways(D_MOVEMENT);
+      cameras[current_cam]->move_sideways(D_MOVEMENT);
     }
     if (has_pressed(Key::D)) {
-      camera.move_sideways(-D_MOVEMENT);
+      cameras[current_cam]->move_sideways(-D_MOVEMENT);
     }
 
     if (has_pressed(Key::Up)) {
-      camera.look_vertical(-LOOK);
+      cameras[current_cam]->look_vertical(-LOOK);
     }
     if (has_pressed(Key::Down)) {
-      camera.look_vertical(LOOK);
+      cameras[current_cam]->look_vertical(LOOK);
     }
     if (has_pressed(Key::Left)) {
-      camera.look_horizontal(LOOK);
+      cameras[current_cam]->look_horizontal(LOOK);
     }
     if (has_pressed(Key::Right)) {
-      camera.look_horizontal(-LOOK);
+      cameras[current_cam]->look_horizontal(-LOOK);
     }
 
     /*
@@ -84,12 +100,14 @@ int main(int argc, char **argv) {
         last_mouse_pos = mouse_pos;
     */
 
-    camera.transform(cube);
-    camera.transform(object);
+    cameras[current_cam]->transform(cube);
+    cameras[current_cam]->transform(object);
+    cameras[current_cam]->transform(bullet);
 
-    GUI::get().draw(&camera, {&cube, &object});
+    GUI::get().draw(current_cam, cameras, {&cube, &object, &bullet});
 
     engine.draw(cube);
     engine.draw(object);
+    engine.draw(bullet);
   });
 }
