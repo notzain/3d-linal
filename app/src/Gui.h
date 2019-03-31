@@ -30,7 +30,7 @@ public:
 
   void display(sf::RenderWindow &window) { ImGui::SFML::Render(window); }
 
-  void draw(Game& game);
+  void draw(Game &game);
 
 private:
   void draw_engine();

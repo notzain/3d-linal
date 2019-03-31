@@ -20,8 +20,7 @@ public:
     origin_ += direction * velocity * dt;
   }
 
-  void accelerate(float dt)
-  {
+  void accelerate(float dt) {
     velocity += dt;
     velocity = std::clamp(velocity, 0.f, 5.f);
   }

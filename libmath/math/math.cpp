@@ -150,8 +150,7 @@ matrix point_at(const math::vector &pos, const math::vector &target,
 
   return matrix;
 }
-vector rotation_to_direction(const math::vector &dir, const math::vector &rot)
-{
+vector rotation_to_direction(const math::vector &dir, const math::vector &rot) {
   auto direction = math::multiply(dir, math::make_rotation_x(rot.x));
   direction = math::multiply(direction, math::make_rotation_y(rot.y));
   direction = math::multiply(direction, math::make_rotation_z(rot.z));

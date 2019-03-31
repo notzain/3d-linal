@@ -11,9 +11,9 @@ class Bullet : public Mesh {
   math::vector direction_{0, 0, 1};
   std::vector<Polygon> polygons;
   mutable std::vector<Polygon> cached;
+
 public:
   float velocity = 7;
-
 
   Bullet(math::vector start, math::vector direction, float velocity);
 

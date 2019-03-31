@@ -24,8 +24,7 @@ matrix &matrix::operator*=(const matrix &other) {
     for (int j = 0; j < 4; j++) {
       (*this)(j, i) = (*this)(j, 0) * other(0, i) +
                       (*this)(j, 1) * other(1, i) +
-                      (*this)(j, 2) * other(2, i) + 
-                      (*this)(j, 3) * other(3, i);
+                      (*this)(j, 2) * other(2, i) + (*this)(j, 3) * other(3, i);
     }
   }
 

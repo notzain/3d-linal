@@ -54,11 +54,8 @@ float vector::dot_product(const vector &other) const {
 }
 
 vector vector::cross_product(const vector &other) const {
-  return {
-    y * other.z - z * other.y,
-    z * other.x - x * other.z,
-    x * other.y - y * other.x
-  };
+  return {y * other.z - z * other.y, z * other.x - x * other.z,
+          x * other.y - y * other.x};
 }
 
 float vector::length() const { return sqrtf(dot_product(*this)); }
