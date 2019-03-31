@@ -18,6 +18,8 @@ matrix inverse(const matrix &matrix);
 matrix point_at(const math::vector &camera, const math::vector &target,
                 const math::vector &up);
 
+vector rotation_to_direction(const math::vector &dir, const math::vector& rot);
+
 float to_radians(float degrees);
 float to_degrees(float radians);
 

@@ -36,20 +36,5 @@ public:
 
   virtual void calc_normal() = 0;
 
-  virtual bool checkAABB(const Mesh &other) {
-#define AXIS_ALIGNS(axis)                                                      \
-  (fabs(origin().axis - other.origin().axis) <                                 \
-   scaling().axis + other.scaling().axis)
-
-    if (AXIS_ALIGNS(x)) {
-      if (AXIS_ALIGNS(y)) {
-        if (AXIS_ALIGNS(z)) {
-          return true;
-        }
-      }
-    }
-
-#undef AXIS_ALIGNS
-    return false;
-  }
+  virtual bool checkAABB(const Mesh &other);
 };

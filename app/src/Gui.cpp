@@ -1,6 +1,7 @@
 #include "Gui.h"
 
 #include "Engine.h"
+#include "Game.h"
 
 static bool show_fps = true;
 
@@ -17,6 +18,25 @@ static struct render_settings {
   bool solid = false;
   bool see_through = true;
 } render_settings;
+
+void GUI::init(sf::RenderWindow &window, float fontScale) {
+  ImGui::SFML::Init(window);
+  ImGui::GetIO().Fonts->Fonts[0]->Scale = fontScale;
+}
+
+void GUI::draw(Game &game) {
+  ImGui::Begin("extra punten");
+
+  if (ImGui::BeginTabBar("Test")) {
+    draw_engine();
+    draw_camera(game);
+    draw_mesh(game);
+
+    ImGui::EndTabBar();
+  }
+
+  ImGui::End();
+}
 
 void GUI::draw_engine() {
   if (ImGui::BeginTabItem("Engine")) {
@@ -49,5 +69,133 @@ void GUI::draw_engine() {
     }
 
     ImGui::EndTabItem();
+  }
+}
+
+void GUI::draw_camera(Game &game) {
+  bool updated = false;
+  if (ImGui::BeginTabItem("Camera")) {
+    const char *text[] = {"Free", "Follow", "Bird"};
+    ImGui::Combo("Cameras", &game.current_cam, text, 3);
+
+    if (ImGui::CollapsingHeader("Settings")) {
+      ImGui::Indent();
+      if (ImGui::SliderFloat(
+              "FOV", &game.cameras[game.current_cam]->settings.fov, 40, 200)) {
+        updated = true;
+      }
+      if (ImGui::SliderFloat("Near",
+                             &game.cameras[game.current_cam]->settings.near,
+                             0.01f, 1000.f)) {
+        updated = true;
+      }
+      if (ImGui::SliderFloat("Far",
+                             &game.cameras[game.current_cam]->settings.far,
+                             0.01f, 1000.f)) {
+        updated = true;
+      }
+      ImGui::Unindent();
+    }
+
+    ImGui::DragFloat2("Camera Rotation (X, Y)",
+                      &game.cameras[game.current_cam]->yaw, 0.02f);
+
+    ImGui::DragFloat3("Camera Pos (X, Y, Z)",
+                      &game.cameras[game.current_cam]->position.x, 0.02f);
+
+    ImGui::EndTabItem();
+  }
+
+  // ImGui::DragFloat3("Camera LookAt (X, Y, Z)", &camera.target.x,
+  // 0.02f);
+
+  if (updated)
+    game.cameras[game.current_cam]->reconfigure();
+}
+
+void GUI::draw_mesh(Game &game) {
+  if (ImGui::BeginTabItem("Objects")) {
+    int i = 0;
+    if (ImGui::TreeNode((void *)(intptr_t)i, "Ship", i)) {
+      ImGui::DragFloat3("Position (X, Y, Z)", &game.ship.origin().x, 0.02f);
+      ImGui::DragFloat3("Rotation (X, Y, Z)", &game.ship.rotation().x, 0.02f);
+      ImGui::DragFloat3("Scale (X, Y, Z)", &game.ship.scaling().x, 0.02f);
+
+      ImGui::ColorEdit3("Color", game.ship.color);
+      ImGui::TreePop();
+    }
+
+    for (i = 1; i - 1 < game.targets.objects.size(); i++) {
+      if (ImGui::TreeNode((void *)(intptr_t)i, "Target %d", i - 1)) {
+        ImGui::DragFloat3("Position (X, Y, Z)",
+                          &game.targets.objects[i - 1]->origin().x, 0.02f);
+        ImGui::DragFloat3("Rotation (X, Y, Z)",
+                          &game.targets.objects[i - 1]->rotation().x, 0.02f);
+        ImGui::DragFloat3("Scale (X, Y, Z)",
+                          &game.targets.objects[i - 1]->scaling().x, 0.02f);
+
+        ImGui::ColorEdit3("Color", game.targets.objects[i - 1]->color);
+        ImGui::TreePop();
+      }
+    }
+
+    for (i = 1 + game.targets.objects.size();
+         i - 1 - game.targets.objects.size() < game.objects.size(); i++) {
+      if (ImGui::TreeNode((void *)(intptr_t)i, "Object %d",
+                          i - 1 - game.targets.objects.size())) {
+        ImGui::DragFloat3(
+            "Position (X, Y, Z)",
+            &game.objects[i - 1 - game.objects.size()]->origin().x, 0.02f);
+        ImGui::DragFloat3(
+            "Rotation (X, Y, Z)",
+            &game.objects[i - 1 - game.objects.size()]->rotation().x, 0.02f);
+        ImGui::DragFloat3(
+            "Scale (X, Y, Z)",
+            &game.objects[i - 1 - game.objects.size()]->scaling().x, 0.02f);
+
+        ImGui::ColorEdit3("Color",
+                          game.objects[i - 1 - game.objects.size()]->color);
+        ImGui::TreePop();
+      }
+    }
+    for (i = 1 + game.targets.objects.size() + game.objects.size();
+         i - 1 - game.targets.objects.size() - game.objects.size() <
+         game.bullets.size();
+         i++) {
+      if (ImGui::TreeNode((void *)(intptr_t)i, "Bullet %d",
+                          i - 1 - game.targets.objects.size() -
+                              game.objects.size())) {
+        ImGui::DragFloat3("Position (X, Y, Z)",
+                          &game.bullets[i - 1 - game.targets.objects.size() -
+                                        game.objects.size()]
+                               .origin()
+                               .x,
+                          0.02f);
+        ImGui::DragFloat3("Rotation (X, Y, Z)",
+                          &game.bullets[i - 1 - game.targets.objects.size() -
+                                        game.objects.size()]
+                               .rotation()
+                               .x,
+                          0.02f);
+        ImGui::DragFloat3("Scale (X, Y, Z)",
+                          &game.bullets[i - 1 - game.targets.objects.size() -
+                                        game.objects.size()]
+                               .scaling()
+                               .x,
+                          0.02f);
+        ImGui::DragFloat("Velocity",
+                         &game.bullets[i - 1 - game.targets.objects.size() -
+                                       game.objects.size()]
+                              .velocity,
+                         0.02f);
+
+        ImGui::ColorEdit3("Color",
+                          game.bullets[i - 1 - game.targets.objects.size() -
+                                       game.objects.size()]
+                              .color);
+        ImGui::TreePop();
+      }
+    }
+    ImGui::TreePop();
   }
 }

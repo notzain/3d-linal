@@ -33,12 +33,7 @@ public:
     return engine;
   }
 
-  void init(const std::string &title, int width, int height) {
-    this->title = title;
-    this->window.create(sf::VideoMode(width, height), title);
-
-    GUI::get().init(window);
-  }
+  void init(const std::string &title, int width, int height);
 
   float mouse_sensitivity() const { return _mouse_sensitivity / 10; }
   void set_mouse_sensitivyt(float value) { _mouse_sensitivity = value; }
@@ -48,13 +43,7 @@ public:
     window.setTitle(title);
   }
 
-  void show_fps(bool show) {
-    show_fps_ = show;
-
-    if (!show) {
-      set_title(title);
-    }
-  }
+  void show_fps(bool show);
 
   void set_framerate(unsigned int framerate) {
     window.setFramerateLimit(framerate);
@@ -64,52 +53,11 @@ public:
 
   bool is_running() const { return window.isOpen(); }
 
-  void update() {
-    const auto time = clock.restart();
-    delta_time = time.asSeconds();
-    const auto fps = 1.f / delta_time;
-
-    sf::Event event;
-    while (window.pollEvent(event)) {
-      GUI::get().poll(event);
-      if (event.type == sf::Event::Closed)
-        window.close();
-    }
-
-    if (show_fps_) {
-      window.setTitle(title + " - " + std::to_string(fps));
-    }
-
-    GUI::get().update(window, time);
-  }
-
   sf::Vector2i mouse_position() const { return sf::Mouse::getPosition(); }
 
-  void draw(const Mesh &mesh) {
-    if (render_settings.render_type & RenderType::WIREFRAME &&
-        render_settings.render_type & RenderType::SOLID) {
-      WireframeAndSolidRenderer renderer(&window, render_settings.see_through);
-      mesh.draw(renderer);
-    } else if (render_settings.render_type & RenderType::WIREFRAME) {
-      WireframeRenderer renderer(&window, render_settings.see_through);
-      mesh.draw(renderer);
-    }
-    if (render_settings.render_type & RenderType::SOLID) {
-      SolidRenderer renderer(&window);
-      mesh.draw(renderer);
-    }
-  }
+  void update();
 
-  void run(std::function<void(float)> onUpdate) {
-    while (is_running()) {
-      window.clear();
+  void draw(const Mesh &mesh);
 
-      update();
-
-      onUpdate(delta_time);
-
-      GUI::get().display(window);
-      window.display();
-    }
-  }
+  void run(std::function<void(float)> onUpdate);
 };

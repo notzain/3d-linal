@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Cube.h"
 #include "Mesh.h"
 #include "math/math.hpp"
 #include "math/matrix.hpp"
@@ -9,9 +8,9 @@
 #include <cmath>
 
 struct CameraSettings {
-  const float screen_width{};
-  const float screen_height{};
-  const float aspect_ratio{};
+  float screen_width{};
+  float screen_height{};
+  float aspect_ratio{};
 
   float fov{};
   float near{};
@@ -105,9 +104,9 @@ struct FreeCamera : public Camera {
 };
 
 struct FollowCamera : public Camera {
-  const Mesh *target_;
-  float distance_to_target = 2;
-  FollowCamera(const CameraSettings &settings, const Mesh *target)
+  Mesh *target_;
+  float distance_to_target = 0;
+  FollowCamera(const CameraSettings &settings, Mesh *target)
       : Camera(settings), target_(target) {
     reconfigure();
   }
@@ -127,37 +126,48 @@ struct FollowCamera : public Camera {
 
   void look_horizontal(float dt) override { yaw += dt; }
 
-  void recalculate() {
-    float hor_distance = distance_to_target * cosf(math::to_radians(pitch));
-    float vert_distance = distance_to_target * sinf(math::to_radians(pitch));
+  void transform_target() {
+    /*
+    target_->origin() = position;
+    target_->rotation().y = math::to_radians(yaw - 90);
 
-    float angle = target_->rotation().y;
-    float offset_x = hor_distance * sin(angle); // sin(math::to_radians(angle));
-    float offset_z = hor_distance * cos(angle); // cos(math::to_radians(angle));
+    auto direction = math::rotation_to_direction({0, 0, -1},
+                                                 target_->rotation());
+    target_->origin() += direction.normalized() * 2;
+    */
 
-    position.x = target_->origin().x - offset_x;
-    position.y = target_->origin().y + vert_distance;
-    position.z = target_->origin().z - offset_z;
-
-    yaw = 90 + math::to_degrees(target_->rotation().y);
+    position = target_->origin();
+    yaw = math::to_degrees(target_->rotation().y) + 90;
   }
 
   void transform(Mesh &mesh) override {
 
-    recalculate();
+    transform_target();
+
     const auto rotZ = math::make_rotation_z(0.f);
     const auto rotX = math::make_rotation_x(0.f);
 
-    const auto translation =
-        math::make_translation({0.f, 0.f, distance_to_target});
+    const auto translation = math::make_translation({0.f, 0.f, 5.f});
 
     auto world = rotZ * rotX;
     world *= translation;
+
+    const auto front = math::vector{
+        cosf(math::to_radians(yaw)) * cosf(math::to_radians(pitch)),
+        sinf(math::to_radians(pitch)),
+        sinf(math::to_radians(yaw)) * cosf(math::to_radians(pitch))};
+
+    direction = front.normalized();
+
+    const auto look_at = position + direction;
+    const auto view = math::inverse(math::point_at(position, look_at, up));
 
     // in this case, also works without inverse.
     // results in flipped normals (might be ok for this program)
     // const auto view = math::inverse(cameraMat);
     // const auto view = cameraMat;
+
+    mesh.scale(math::make_scaling(mesh.scaling()));
 
     // rotate mesh around origin first
     mesh.rotate(math::make_rotation_x(mesh.rotation().x));
@@ -167,20 +177,6 @@ struct FollowCamera : public Camera {
     // Every mesh is positioned on (0,0,0).
     // Move the mesh to its desired position by translating it by its origin.
     mesh.translate(math::make_translation(mesh.origin()));
-
-    mesh.scale(math::make_scaling((mesh.scaling())));
-
-    recalculate();
-
-    const auto front = math::vector{
-        cosf(math::to_radians(yaw)) * cosf(math::to_radians(pitch)),
-        sinf(math::to_radians(pitch)),
-        sinf(math::to_radians(yaw)) * cosf(math::to_radians(pitch))};
-
-    direction = front.normalized();
-
-    const auto look_at = direction + position;
-    const auto view = math::inverse(math::point_at(position, look_at, up));
 
     mesh.rotate(world);
 
