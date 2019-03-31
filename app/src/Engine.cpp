@@ -1,5 +1,8 @@
 #include "Engine.h"
 
+#include <SFML/Graphics/Font.hpp>
+#include <SFML/Graphics/Text.hpp>
+
 void Engine::init(const std::string &title, int width, int height) {
   this->title = title;
   this->window.create(sf::VideoMode(width, height), title);
@@ -47,6 +50,20 @@ void Engine::draw(const Mesh &mesh) {
     SolidRenderer renderer(&window);
     mesh.draw(renderer);
   }
+}
+
+void Engine::draw_text(const std::string &text, int size,
+                       sf::Vector2f position) {
+  sf::Font font;
+  font.loadFromFile("objs/font.otf");
+
+  sf::Text txt;
+  txt.setPosition(position);
+  txt.setFont(font);
+  txt.setCharacterSize(size);
+  txt.setString(text);
+
+  window.draw(txt);
 }
 
 void Engine::run(std::function<void(float)> onUpdate) {

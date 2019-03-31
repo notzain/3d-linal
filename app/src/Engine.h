@@ -19,6 +19,8 @@ class Engine {
   sf::RenderWindow window;
   sf::Clock clock;
 
+  bool exit_ = false;
+
   float _mouse_sensitivity = .5f;
   float delta_time = 0;
   bool show_fps_ = true;
@@ -51,13 +53,15 @@ public:
 
   RenderSettings &get_render_settings() { return render_settings; }
 
-  bool is_running() const { return window.isOpen(); }
+  bool is_running() const { return window.isOpen() && !exit_; }
+  void exit() { exit_ = true; }
 
   sf::Vector2i mouse_position() const { return sf::Mouse::getPosition(); }
 
   void update();
 
   void draw(const Mesh &mesh);
+  void draw_text(const std::string &text, int size, sf::Vector2f position);
 
   void run(std::function<void(float)> onUpdate);
 };

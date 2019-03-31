@@ -10,6 +10,7 @@
 #include <SFML/Graphics/VertexArray.hpp>
 #include <SFML/System/Clock.hpp>
 #include <memory>
+#include <thread>
 #include <vector>
 
 class GUI;
@@ -164,9 +165,8 @@ public:
         }
         for (auto &o : targets.objects) {
           if (o->checkAABB(b)) {
-            o->color[0] = 0;
-          } else {
-            o->color[0] = 1;
+            engine.draw_text("You Win!", 24, {0, 0});
+            engine.exit();
           }
         }
       }
@@ -205,5 +205,7 @@ public:
                                    }),
                     bullets.end());
     });
+
+    std::this_thread::sleep_for(std::chrono::seconds(2));
   }
 };

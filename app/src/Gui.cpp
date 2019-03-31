@@ -106,9 +106,6 @@ void GUI::draw_camera(Game &game) {
     ImGui::EndTabItem();
   }
 
-  // ImGui::DragFloat3("Camera LookAt (X, Y, Z)", &camera.target.x,
-  // 0.02f);
-
   if (updated)
     game.cameras[game.current_cam]->reconfigure();
 }
