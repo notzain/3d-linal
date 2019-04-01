@@ -28,13 +28,13 @@ struct Polygon {
 
     // Quad
     if (vertices.size() == 4) {
-      normal = normal_of(clockwise, vertices[0], vertices[1], vertices[2])
+      normal = normal_of(clockwise, vertices[0], vertices[1], vertices[2],
+                         vertices[3])
                    .normalized();
     }
     // Triangle
     else if (vertices.size() == 3) {
-      normal = normal_of(clockwise, vertices[0], vertices[1], vertices[2],
-                         vertices[3])
+      normal = normal_of(clockwise, vertices[0], vertices[1], vertices[2])
                    .normalized();
     }
   }
