@@ -60,7 +60,7 @@ public:
 
   void update();
 
-  void draw(const Mesh &mesh);
+  void draw(const math::vector &cam, const Mesh &mesh);
   void draw_text(const std::string &text, int size, sf::Vector2f position);
 
   void run(std::function<void(float)> onUpdate);

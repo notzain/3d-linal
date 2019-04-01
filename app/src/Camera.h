@@ -25,6 +25,7 @@ struct Camera {
   math::vector up{0, 1, 0};
   float yaw = 90.f;
   float pitch{};
+  float roll{};
 
   Camera(const CameraSettings &settings) : settings(settings) {}
   virtual void reconfigure() = 0;
@@ -105,7 +106,7 @@ struct FreeCamera : public Camera {
 
 struct FollowCamera : public Camera {
   Mesh *target_;
-  float distance_to_target = 0;
+  float distance_to_target = 1;
   FollowCamera(const CameraSettings &settings, Mesh *target)
       : Camera(settings), target_(target) {
     reconfigure();
@@ -126,24 +127,7 @@ struct FollowCamera : public Camera {
 
   void look_horizontal(float dt) override { yaw += dt; }
 
-  void transform_target() {
-    /*
-    target_->origin() = position;
-    target_->rotation().y = math::to_radians(yaw - 90);
-
-    auto direction = math::rotation_to_direction({0, 0, -1},
-                                                 target_->rotation());
-    target_->origin() += direction.normalized() * 2;
-    */
-
-    position = target_->origin();
-    yaw = math::to_degrees(target_->rotation().y) + 90;
-  }
-
   void transform(Mesh &mesh) override {
-
-    transform_target();
-
     const auto rotZ = math::make_rotation_z(0.f);
     const auto rotX = math::make_rotation_x(0.f);
 
@@ -151,6 +135,13 @@ struct FollowCamera : public Camera {
 
     auto world = rotZ * rotX;
     world *= translation;
+
+    position = target_->origin();
+    position -= math::rotation_to_direction({0, 0, 1}, target_->rotation())
+                    .normalized() *
+                distance_to_target;
+    yaw = 90 + math::to_degrees(target_->rotation().y);
+    pitch = 0 - math::to_degrees(target_->rotation().x);
 
     const auto front = math::vector{
         cosf(math::to_radians(yaw)) * cosf(math::to_radians(pitch)),
@@ -160,6 +151,7 @@ struct FollowCamera : public Camera {
     direction = front.normalized();
 
     const auto look_at = position + direction;
+
     const auto view = math::inverse(math::point_at(position, look_at, up));
 
     // in this case, also works without inverse.

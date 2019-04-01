@@ -11,6 +11,11 @@ struct vector {
   vector(float x, float y, float z) : x(x), y(y), z(z) {}
   vector(float x, float y, float z, float w) : x(x), y(y), z(z), w(w) {}
 
+  bool operator==(const vector &other) const {
+    return x == other.x && y == other.y && z == other.z;
+  }
+
+  bool operator!=(const vector &other) const { return !(*this == other); }
   vector &operator+=(const vector &other);
   vector &operator-=(const vector &other);
   vector &operator*=(float factor);

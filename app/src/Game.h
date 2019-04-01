@@ -46,6 +46,7 @@ class Game {
   std::vector<std::unique_ptr<Mesh>> objects;
 
   Spaceship ship;
+  Spaceship cockpit;
   std::vector<Bullet> bullets;
   float reload_time = 1;
   float last_shot = 0;
@@ -57,16 +58,18 @@ class Game {
   Camera *cameras[3];
   int current_cam = 0;
 
+  bool has_won = false;
+
   friend class GUI;
 
 public:
   Game(std::string name, float screen_width, float screen_height)
-      : ship("objs/spaceship.obj"),
+      : ship("objs/spaceship.obj"), cockpit("objs/cockpit.obj"),
         free_cam({screen_width, screen_height, screen_height / screen_height,
                   90.f, 0.1f, 1000.f}),
         follow_cam({screen_width, screen_height, screen_height / screen_height,
                     90.f, 0.1f, 1000.f},
-                   &ship),
+                   &cockpit),
         bird_cam({screen_width, screen_height, screen_height / screen_height,
                   90.f, 0.1f, 1000.f}) {
     Engine::get().init(name, screen_width, screen_height);
@@ -99,6 +102,14 @@ public:
       const auto D_MOVEMENT = MOVEMENT * dt;
       const auto LOOK = 100 * dt;
 
+      if (has_won) {
+        engine.draw_text("You Win! Press ALT to exit", 24, {0, 0});
+
+        if (has_pressed(Key::LAlt) || has_pressed(Key::RAlt)) {
+          engine.exit();
+        }
+      }
+
       if (has_pressed(Key::Tab)) {
         current_cam++;
         if (current_cam > 1)
@@ -106,30 +117,64 @@ public:
       }
 
       // WASD - Look direction
-      if (has_pressed(Key::W)) {
-        cameras[current_cam]->move_forward(D_MOVEMENT);
-      }
-      if (has_pressed(Key::S)) {
-        cameras[current_cam]->move_forward(-D_MOVEMENT);
-      }
-      if (has_pressed(Key::A)) {
-        cameras[current_cam]->move_sideways(D_MOVEMENT);
-      }
-      if (has_pressed(Key::D)) {
-        cameras[current_cam]->move_sideways(-D_MOVEMENT);
-      }
+      if (current_cam == 0) {
+        if (has_pressed(Key::W)) {
+          cameras[current_cam]->move_forward(D_MOVEMENT);
+        }
+        if (has_pressed(Key::S)) {
+          cameras[current_cam]->move_forward(-D_MOVEMENT);
+        }
+        if (has_pressed(Key::A)) {
+          cameras[current_cam]->move_sideways(D_MOVEMENT);
+        }
+        if (has_pressed(Key::D)) {
+          cameras[current_cam]->move_sideways(-D_MOVEMENT);
+        }
 
-      if (has_pressed(Key::Up)) {
-        cameras[current_cam]->look_vertical(-LOOK);
-      }
-      if (has_pressed(Key::Down)) {
-        cameras[current_cam]->look_vertical(LOOK);
-      }
-      if (has_pressed(Key::Left)) {
-        cameras[current_cam]->look_horizontal(LOOK);
-      }
-      if (has_pressed(Key::Right)) {
-        cameras[current_cam]->look_horizontal(-LOOK);
+        if (has_pressed(Key::Up)) {
+          cameras[current_cam]->look_vertical(-LOOK);
+        }
+        if (has_pressed(Key::Down)) {
+          cameras[current_cam]->look_vertical(LOOK);
+        }
+        if (has_pressed(Key::Left)) {
+          cameras[current_cam]->look_horizontal(LOOK);
+        }
+        if (has_pressed(Key::Right)) {
+          cameras[current_cam]->look_horizontal(-LOOK);
+        }
+      } else {
+        if (has_pressed(Key::W)) {
+          ship.look_x(D_MOVEMENT);
+        }
+        if (has_pressed(Key::S)) {
+          ship.look_x(-D_MOVEMENT);
+        }
+        if (has_pressed(Key::A)) {
+          ship.look_y(D_MOVEMENT);
+        }
+        if (has_pressed(Key::D)) {
+          ship.look_y(-D_MOVEMENT);
+        }
+        if (has_pressed(Key::E)) {
+          ship.look_z(D_MOVEMENT);
+        }
+        if (has_pressed(Key::Q)) {
+          ship.look_z(-D_MOVEMENT);
+        }
+
+        if (has_pressed(Key::Up)) {
+          cameras[current_cam]->look_vertical(-LOOK);
+        }
+        if (has_pressed(Key::Down)) {
+          cameras[current_cam]->look_vertical(LOOK);
+        }
+        if (has_pressed(Key::Left)) {
+          cameras[current_cam]->look_horizontal(LOOK);
+        }
+        if (has_pressed(Key::Right)) {
+          cameras[current_cam]->look_horizontal(-LOOK);
+        }
       }
 
       if (has_pressed(Key::LShift)) {
@@ -148,8 +193,16 @@ public:
       last_shot += dt;
 
       ship.update(dt);
-      cameras[current_cam]->transform(ship);
-      engine.draw(ship);
+      cockpit.origin() = ship.origin();
+      cockpit.rotation() = ship.rotation();
+
+      if (current_cam == 1) {
+        cameras[current_cam]->transform(cockpit);
+        engine.draw(cameras[current_cam]->position, cockpit);
+      } else {
+        cameras[current_cam]->transform(ship);
+        engine.draw(cameras[current_cam]->position, ship);
+      }
 
       targets.update(dt);
 
@@ -165,24 +218,26 @@ public:
         }
         for (auto &o : targets.objects) {
           if (o->checkAABB(b)) {
-            engine.draw_text("You Win!", 24, {0, 0});
-            engine.exit();
+            has_won = true;
+            o->color[0] = 0;
+          } else {
+            o->color[0] = 1;
           }
         }
       }
 
       for (auto &o : objects) {
         cameras[current_cam]->transform(*o);
-        engine.draw(*o);
+        engine.draw(cameras[current_cam]->position, *o);
       }
 
       for (auto &o : targets.objects) {
         cameras[current_cam]->transform(*o);
-        engine.draw(*o);
+        engine.draw(cameras[current_cam]->position, *o);
       }
 
       for (auto &b : bullets) {
-        engine.draw(b);
+        engine.draw(cameras[current_cam]->position, b);
       }
 
       GUI::get().draw(*this);
@@ -206,6 +261,6 @@ public:
                     bullets.end());
     });
 
-    std::this_thread::sleep_for(std::chrono::seconds(2));
+    std::this_thread::sleep_for(std::chrono::seconds(1));
   }
 };

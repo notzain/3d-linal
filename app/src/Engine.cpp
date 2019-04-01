@@ -37,17 +37,18 @@ void Engine::update() {
   GUI::get().update(window, time);
 }
 
-void Engine::draw(const Mesh &mesh) {
+void Engine::draw(const math::vector &cam, const Mesh &mesh) {
   if (render_settings.render_type & RenderType::WIREFRAME &&
       render_settings.render_type & RenderType::SOLID) {
-    WireframeAndSolidRenderer renderer(&window, render_settings.see_through);
+    WireframeAndSolidRenderer renderer(cam, &window,
+                                       render_settings.see_through);
     mesh.draw(renderer);
   } else if (render_settings.render_type & RenderType::WIREFRAME) {
-    WireframeRenderer renderer(&window, render_settings.see_through);
+    WireframeRenderer renderer(cam, &window, render_settings.see_through);
     mesh.draw(renderer);
   }
   if (render_settings.render_type & RenderType::SOLID) {
-    SolidRenderer renderer(&window);
+    SolidRenderer renderer(cam, &window);
     mesh.draw(renderer);
   }
 }

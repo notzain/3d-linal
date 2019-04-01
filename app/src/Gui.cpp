@@ -97,7 +97,7 @@ void GUI::draw_camera(Game &game) {
       ImGui::Unindent();
     }
 
-    ImGui::DragFloat2("Camera Rotation (X, Y)",
+    ImGui::DragFloat3("Camera Rotation (X, Y, Z)",
                       &game.cameras[game.current_cam]->yaw, 0.02f);
 
     ImGui::DragFloat3("Camera Pos (X, Y, Z)",
@@ -112,87 +112,62 @@ void GUI::draw_camera(Game &game) {
 
 void GUI::draw_mesh(Game &game) {
   if (ImGui::BeginTabItem("Objects")) {
-    int i = 0;
-    if (ImGui::TreeNode((void *)(intptr_t)i, "Ship", i)) {
+    if (ImGui::CollapsingHeader("Ship")) {
       ImGui::DragFloat3("Position (X, Y, Z)", &game.ship.origin().x, 0.02f);
       ImGui::DragFloat3("Rotation (X, Y, Z)", &game.ship.rotation().x, 0.02f);
       ImGui::DragFloat3("Scale (X, Y, Z)", &game.ship.scaling().x, 0.02f);
 
       ImGui::ColorEdit3("Color", game.ship.color);
-      ImGui::TreePop();
     }
 
-    for (i = 1; i - 1 < game.targets.objects.size(); i++) {
-      if (ImGui::TreeNode((void *)(intptr_t)i, "Target %d", i - 1)) {
-        ImGui::DragFloat3("Position (X, Y, Z)",
-                          &game.targets.objects[i - 1]->origin().x, 0.02f);
-        ImGui::DragFloat3("Rotation (X, Y, Z)",
-                          &game.targets.objects[i - 1]->rotation().x, 0.02f);
-        ImGui::DragFloat3("Scale (X, Y, Z)",
-                          &game.targets.objects[i - 1]->scaling().x, 0.02f);
+    if (ImGui::CollapsingHeader("Targets")) {
+      for (int i = 0; i < game.targets.objects.size(); i++) {
+        if (ImGui::TreeNode((void *)(intptr_t)i, "Target %d", i)) {
+          ImGui::DragFloat3("Position (X, Y, Z)",
+                            &game.targets.objects[i]->origin().x, 0.02f);
+          ImGui::DragFloat3("Rotation (X, Y, Z)",
+                            &game.targets.objects[i]->rotation().x, 0.02f);
+          ImGui::DragFloat3("Scale (X, Y, Z)",
+                            &game.targets.objects[i]->scaling().x, 0.02f);
 
-        ImGui::ColorEdit3("Color", game.targets.objects[i - 1]->color);
-        ImGui::TreePop();
+          ImGui::ColorEdit3("Color", game.targets.objects[i]->color);
+          ImGui::TreePop();
+        }
       }
     }
 
-    for (i = 1 + game.targets.objects.size();
-         i - 1 - game.targets.objects.size() < game.objects.size(); i++) {
-      if (ImGui::TreeNode((void *)(intptr_t)i, "Object %d",
-                          i - 1 - game.targets.objects.size())) {
-        ImGui::DragFloat3(
-            "Position (X, Y, Z)",
-            &game.objects[i - 1 - game.objects.size()]->origin().x, 0.02f);
-        ImGui::DragFloat3(
-            "Rotation (X, Y, Z)",
-            &game.objects[i - 1 - game.objects.size()]->rotation().x, 0.02f);
-        ImGui::DragFloat3(
-            "Scale (X, Y, Z)",
-            &game.objects[i - 1 - game.objects.size()]->scaling().x, 0.02f);
+    if (ImGui::CollapsingHeader("Objs")) {
+      for (int i = 0; i < game.objects.size(); i++) {
+        if (ImGui::TreeNode((void *)(intptr_t)i, "Object %d", i)) {
+          ImGui::DragFloat3("Position (X, Y, Z)", &game.objects[i]->origin().x,
+                            0.02f);
+          ImGui::DragFloat3("Rotation (X, Y, Z)",
+                            &game.objects[i]->rotation().x, 0.02f);
+          ImGui::DragFloat3("Scale (X, Y, Z)", &game.objects[i]->scaling().x,
+                            0.02f);
 
-        ImGui::ColorEdit3("Color",
-                          game.objects[i - 1 - game.objects.size()]->color);
-        ImGui::TreePop();
+          ImGui::ColorEdit3("Color", game.objects[i]->color);
+          ImGui::TreePop();
+        }
       }
     }
-    for (i = 1 + game.targets.objects.size() + game.objects.size();
-         i - 1 - game.targets.objects.size() - game.objects.size() <
-         game.bullets.size();
-         i++) {
-      if (ImGui::TreeNode((void *)(intptr_t)i, "Bullet %d",
-                          i - 1 - game.targets.objects.size() -
-                              game.objects.size())) {
-        ImGui::DragFloat3("Position (X, Y, Z)",
-                          &game.bullets[i - 1 - game.targets.objects.size() -
-                                        game.objects.size()]
-                               .origin()
-                               .x,
-                          0.02f);
-        ImGui::DragFloat3("Rotation (X, Y, Z)",
-                          &game.bullets[i - 1 - game.targets.objects.size() -
-                                        game.objects.size()]
-                               .rotation()
-                               .x,
-                          0.02f);
-        ImGui::DragFloat3("Scale (X, Y, Z)",
-                          &game.bullets[i - 1 - game.targets.objects.size() -
-                                        game.objects.size()]
-                               .scaling()
-                               .x,
-                          0.02f);
-        ImGui::DragFloat("Velocity",
-                         &game.bullets[i - 1 - game.targets.objects.size() -
-                                       game.objects.size()]
-                              .velocity,
-                         0.02f);
 
-        ImGui::ColorEdit3("Color",
-                          game.bullets[i - 1 - game.targets.objects.size() -
-                                       game.objects.size()]
-                              .color);
-        ImGui::TreePop();
+    if (ImGui::CollapsingHeader("Bullets")) {
+      for (int i = 0; i < game.bullets.size(); i++) {
+        if (ImGui::TreeNode((void *)(intptr_t)i, "Bullet %d", i)) {
+          ImGui::DragFloat3("Position (X, Y, Z)", &game.bullets[i].origin().x,
+                            0.02f);
+          ImGui::DragFloat3("Rotation (X, Y, Z)", &game.bullets[i].rotation().x,
+                            0.02f);
+          ImGui::DragFloat3("Scale (X, Y, Z)", &game.bullets[i].scaling().x,
+                            0.02f);
+
+          ImGui::ColorEdit3("Color", game.bullets[i].color);
+          ImGui::TreePop();
+        }
       }
     }
-    ImGui::TreePop();
+
+    ImGui::EndTabItem();
   }
 }

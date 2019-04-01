@@ -7,6 +7,10 @@ Bullet::Bullet(math::vector start, math::vector direction, float velocity)
   origin_ = start;
   rotation_ = direction;
 
+  color[0] = 1;
+  color[1] = 0;
+  color[2] = 0;
+
   polygons = {
       // NORTH
       Polygon{{math::vector(0.0f, 0.0f, 0.0f), math::vector(0.0f, 1.0f, 0.0f),

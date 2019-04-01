@@ -6,9 +6,10 @@
 void WireframeRenderer::draw(const std::vector<Polygon> &mesh,
                              sf::Color color) {
   for (const auto &polygon : mesh) {
-    auto normal = polygon.normal.normalized();
+    auto normal = polygon.normal;
+    auto cam = polygon.distance - cam_pos;
 
-    if (normal.z < 0 || see_through) {
+    if (normal.dot_product(cam) < 0.f || see_through) {
       for (int i = 0; i < polygon.vertices.size(); ++i) {
         const auto &current_vertex = polygon.vertices[i];
         const auto &next_vertex = i == polygon.vertices.size() - 1
@@ -33,8 +34,10 @@ void SolidRenderer::draw(const std::vector<Polygon> &mesh, sf::Color color) {
   std::vector<Polygon> polygons_to_draw;
 
   for (const auto &polygon : mesh) {
-    const auto &normal = polygon.normal;
-    if (normal.z < 0) {
+    auto normal = polygon.normal;
+    auto cam = polygon.distance - cam_pos;
+
+    if (normal.dot_product(cam) < 0.f) {
       for (int i = 0; i < polygon.vertices.size(); ++i) {
         auto current_vertex = polygon.vertices[i];
         auto next_vertex = i == polygon.vertices.size() - 1
@@ -71,8 +74,7 @@ void SolidRenderer::draw(const std::vector<Polygon> &mesh, sf::Color color) {
     }
 
     auto normal = polygon.normal;
-    math::vector light_dir{0.f, 0.f, -5.f};
-    light_dir.normalize();
+    auto light_dir = cam_pos.normalized();
 
     auto brightness = std::clamp(light_dir.dot_product(normal), 0.3f, 1.f);
 

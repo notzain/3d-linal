@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Polygon.h"
-
+#include "math/math.hpp"
 #include <SFML/Graphics.hpp>
 
 struct RenderType {
@@ -18,22 +18,27 @@ public:
 };
 
 class WireframeRenderer : public MeshRenderer {
+  math::vector cam_pos;
+
   sf::RenderWindow *window;
 
   bool see_through = false;
 
 public:
-  WireframeRenderer(sf::RenderWindow *window, bool see_through)
-      : window(window), see_through(see_through) {}
+  WireframeRenderer(const math::vector &cam_pos, sf::RenderWindow *window,
+                    bool see_through)
+      : cam_pos(cam_pos), window(window), see_through(see_through) {}
 
   void draw(const std::vector<Polygon> &mesh, sf::Color color) override;
 };
 
 class SolidRenderer : public MeshRenderer {
+  math::vector cam_pos;
   sf::RenderWindow *window;
 
 public:
-  SolidRenderer(sf::RenderWindow *window) : window(window) {}
+  SolidRenderer(const math::vector &cam_pos, sf::RenderWindow *window)
+      : cam_pos(cam_pos), window(window) {}
 
   void draw(const std::vector<Polygon> &mesh, sf::Color color) override;
 };
@@ -43,8 +48,9 @@ class WireframeAndSolidRenderer : public MeshRenderer {
   SolidRenderer solid;
 
 public:
-  WireframeAndSolidRenderer(sf::RenderWindow *window, bool see_through)
-      : wireframe(window, see_through), solid(window) {}
+  WireframeAndSolidRenderer(const math::vector &cam_pos,
+                            sf::RenderWindow *window, bool see_through)
+      : wireframe(cam_pos, window, see_through), solid(cam_pos, window) {}
 
   void draw(const std::vector<Polygon> &mesh, sf::Color color) override {
     solid.draw(mesh, color);

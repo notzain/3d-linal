@@ -15,7 +15,8 @@ protected:
   mutable std::vector<Polygon> cached;
 
 public:
-  Object(const std::string &filename) {
+  Object(const std::string &filename, const math::vector &origin = {})
+      : origin_(origin) {
     load_from_file(filename);
     cached = polygons;
   }
@@ -68,7 +69,7 @@ public:
 
   void calc_normal() override {
     for (auto &polygon : cached) {
-      polygon.calculate_normal();
+      polygon.calculate_normal(false);
     }
   }
 

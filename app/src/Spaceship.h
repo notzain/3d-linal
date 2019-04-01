@@ -13,6 +13,10 @@ public:
   Spaceship(const std::string &filename);
   Polygon front() const override { return *front_; }
 
+  void look_z(float dt) { rotation_.z += dt; }
+  void look_y(float dt) { rotation_.y += dt; }
+  void look_x(float dt) { rotation_.x += dt; }
+
   void update(float dt) {
     auto direction = math::rotation_to_direction({0, 0, 1}, rotation());
     direction.normalize();

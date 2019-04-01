@@ -4,7 +4,6 @@
 #include "math/math.hpp"
 
 class Bullet : public Mesh {
-
   math::vector origin_;
   math::vector rotation_;
   math::vector scale_{0, 0, 1};

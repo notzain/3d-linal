@@ -25,6 +25,7 @@ matrix make_identity() {
   return matrix;
 }
 
+// https://stackoverflow.com/questions/14607640/rotating-a-vector-in-3d-space
 matrix make_rotation_x(float angle) {
   matrix temp;
   temp(0, 0) = 1;
